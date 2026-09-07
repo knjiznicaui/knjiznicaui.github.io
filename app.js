@@ -1,589 +1,853 @@
-const LEGACY_BOOKS = [
-  {
-    id: 'bhakti-rasamrita-sindhu',
-    filename: 'Bhakti-rasāmṛta-sindhu.pdf',
-    short: 'Bhakti-rasāmṛta-sindhu',
-    author: 'Rūpa Gosvāmī',
-    script: 'PDF'
-  },
+/* =========================================================
+   UNIVERSAL AI BOOK LIBRARY
+   ========================================================= */
 
-  {
-    id: 'madhurya-kadambini',
-    filename: 'Madhurya-kadambini-eng-1ed.pdf',
-    short: 'Madhurya-kadambini',
-    author: 'Viśvanātha Cakravartī Ṭhākura',
-    script: 'PDF'
-  },
+/*
+ * =========================================================
+ * PROJECT CONFIGURATION
+ * =========================================================
+ *
+ * 1. GITHUB_OWNER
+ *    GitHub account / organization name.
+ *
+ * 2. GITHUB_REPO
+ *    Repository name.
+ *
+ * 3. AI_WORKER_URL
+ *    URL of the Cloudflare Worker.
+ *
+ * Put PDF books into:
+ *
+ *    books/
+ *
+ * Every PDF inside that folder is automatically loaded.
+ */
 
-  {
-    id: 'raga-vartma-candrika',
-    filename: 'RagaVartmaCandrika_eng_2nd_ed.pdf',
-    short: 'Rāga-vartma-candrikā',
-    author: 'Viśvanātha Cakravartī Ṭhākura',
-    script: 'PDF'
-  },
+const GITHUB_OWNER =
+  'NOVI-ACCOUNT';
 
-  {
-    id: 'caitanya-caritamrita-adi',
-    filename: 'Sri Caitanya-cartamrta Adi-lila.pdf',
-    short: 'Śrī Caitanya-caritāmṛta — Ādi-līlā',
-    author: 'Kṛṣṇadāsa Kavirāja Gosvāmī',
-    script: 'PDF'
-  },
 
-  {
-    id: 'caitanya-caritamrita-antya',
-    filename: 'Sri Caitanya-cartamrta Antya-lila.pdf',
-    short: 'Śrī Caitanya-caritāmṛta — Antya-līlā',
-    author: 'Kṛṣṇadāsa Kavirāja Gosvāmī',
-    script: 'PDF'
-  },
+const GITHUB_REPO =
+  'NOVI-REPO';
 
-  {
-    id: 'caitanya-caritamrita-madhya',
-    filename: 'Sri Caitanya-cartamrta Madhya-lila.pdf',
-    short: 'Śrī Caitanya-caritāmṛta — Madhya-līlā',
-    author: 'Kṛṣṇadāsa Kavirāja Gosvāmī',
-    script: 'PDF'
-  },
 
-  {
-    id: 'prema-bhakti-candrika',
-    filename: 'Sri_Prema_Bhakti_Candrika.pdf',
-    short: 'Śrī Prema-bhakti-candrikā',
-    author: 'Narottama Dāsa Ṭhākura',
-    script: 'PDF'
-  },
+const AI_WORKER_URL =
+  'https://TVOJ-NOVI-WORKER.workers.dev';
 
-  {
-    id: 'ujjvala-nilamani-kirana',
-    filename: 'Ujjvala-nilamani-kirana_1Ed_2013.pdf',
-    short: 'Ujjvala-nīlamaṇi-kiraṇa',
-    author: 'Viśvanātha Cakravartī Ṭhākura',
-    script: 'PDF'
-  }
-];
+
+const GITHUB_BOOKS_API =
+  'https://api.github.com/repos/' +
+  GITHUB_OWNER +
+  '/' +
+  GITHUB_REPO +
+  '/contents/books';
+
+
+const GITHUB_RAW_BASE =
+  'https://raw.githubusercontent.com/' +
+  GITHUB_OWNER +
+  '/' +
+  GITHUB_REPO +
+  '/main/books/';
 
 
 let BOOKS = [];
 
 
-const GITHUB_BOOKS_API =
-  'https://api.github.com/repos/vcasopis/raganugagemini/contents/books';
-
-
-const FALLBACK_BOOK = {
-  id: 'sample-book',
-  title: 'Rāgānugā Bhakti — Sample Book',
-  author: 'Sample Edition',
-  language: 'English',
-  chapters: [
-    {
-      id: 'chapter-1',
-      title: 'The Beginning of Taste',
-      verses: [
-        {
-          ref: '1.1',
-          sanskrit: 'ruciḥ bhakti-pathasya hṛdayam',
-          transliteration: 'ruciḥ bhakti-pathasya hṛdayam',
-          english: 'Taste is the heart of the devotional path.',
-          slovenian: 'Okus oziroma notranja naklonjenost je srce poti predanosti.'
-        },
-        {
-          ref: '1.2',
-          sanskrit: 'śravaṇāt sa bhāvaḥ vardhate',
-          transliteration: 'śravaṇāt sa bhāvaḥ vardhate',
-          english: 'Through attentive hearing, that devotional mood gradually becomes stronger.',
-          slovenian: 'S pozornim poslušanjem se ta notranji odnos postopoma krepi.'
-        }
-      ]
-    },
-
-    {
-      id: 'chapter-2',
-      title: 'Hearing and Practice',
-      verses: [
-        {
-          ref: '2.1',
-          sanskrit: 'śravaṇaṁ kīrtanaṁ ca',
-          transliteration: 'śravaṇaṁ kīrtanaṁ ca',
-          english: 'Hearing and chanting are essential parts of devotional practice.',
-          slovenian: 'Poslušanje in petje sta bistvena dela predanega duhovnega praktikovanja.'
-        },
-        {
-          ref: '2.2',
-          sanskrit: 'smaraṇaṁ sevayā saha',
-          transliteration: 'smaraṇaṁ sevayā saha',
-          english: 'Remembrance becomes deeper when joined with service.',
-          slovenian: 'Spominjanje postaja globlje, ko je povezano s služenjem.'
-        }
-      ]
-    }
-  ]
-};
-
-
-const FORMS = [
-  'Article',
-  'New book',
-  'Poetic recitation',
-  'Song lyrics',
-  'Study notes',
-  'Daily reflection',
-  'Q&A',
-  'Class outline'
-];
-
+/* =========================================================
+   I18N
+   ========================================================= */
 
 const I18N = {
+
   en: {
-    library: 'Library',
-    search: 'Search',
-    create: 'Create',
-    saved: 'My works',
-    books: 'Loaded books',
-    titles: 'titles',
-    collections: 'Collections',
-    continue: 'Continue',
-    sources: 'Sources',
-    findSources: 'Find sources',
-    remove: 'Remove',
-    intent: 'Intent',
-    form: 'Form',
-    generateWork: 'Generate a work',
-    generate: 'Generate',
-    generatedWork: 'Generated work',
-    from: 'From',
-    saveWork: 'Save work',
-    allBooks: 'All books',
-    passages: 'passages',
-    acrossBooks: 'Search loaded books…',
-    endSection: 'End of section',
-    versesMarked: 'verses marked',
-    firstIllumination: 'First illumination',
-    newBook: 'New book',
-    poeticRecitation: 'Poetic recitation',
-    songLyrics: 'Song lyrics',
-    studyNotes: 'Study notes',
-    dailyReflection: 'Daily reflection',
-    classOutline: 'Class outline',
-    readingSelected: 'Reading selected sources',
-    gathering: 'Gathering relevant passages',
-    composing: 'Composing in the chosen form',
-    assembling: 'Assembling the source list',
-    savedToWorks: 'Saved to My works',
-    english: 'English',
-    slovenian: 'Slovenščina',
-    sourcesCount: 'sources',
-    draft: 'draft',
-    noResults: 'No passages found',
-    searching: 'Preparing the library search…',
-    defaultIntent: 'For a Sunday class of newcomers. Keep the Sanskrit terms but explain each one.',
-    sampleBook: 'Sample book',
-    chapters: 'chapters',
-    chapter: 'Chapter',
-    previous: 'Previous',
-    next: 'Next',
-    loading: 'Loading book…',
-    bookLoaded: 'Book loaded',
-    reader: 'Reader',
-    showScript: 'Show Sanskrit',
-    hideScript: 'Hide Sanskrit',
-    bookmark: 'Bookmark',
-    bookmarked: 'Bookmarked',
-    removed: 'Bookmark removed',
-    loadingFailed: 'Could not load the sample book.',
-    backToLibrary: 'Back to Library',
-    noBookmarks: 'No bookmarks yet.',
-    openBookmark: 'Open',
-    removeBookmark: 'Remove bookmark',
-    savedWorks: 'Saved works',
-    resultIn: 'in',
-    chapterResult: 'Chapter',
-    searchHint: 'Search Sanskrit, transliteration, English or Slovenian text.',
-    openPdf: 'Open PDF',
-    choosePart: 'Choose a part',
-    adiLila: 'Ādi-līlā',
-    madhyaLila: 'Madhya-līlā',
-    antyaLila: 'Antya-līlā',
-    pagesIndexed: 'indexed pages',
-    preparingSearch: 'Preparing search index…',
-    searchReady: 'Library search ready',
-    rebuildingSearch: 'Building the library index…',
-    pdfPage: 'PDF · page',
-    openPage: 'Open page',
-    indexedPages: 'Indexed pages',
 
-    aiLecture: 'AI Lecture',
-    chooseBooks: 'Choose books',
-    selectedBooks: 'selected',
-    lectureTopic: 'Lecture topic',
-    lectureTopicPlaceholder: 'What should the lecture explain?',
-    lectureLength: 'Lecture length',
-    minutes10: '10 min',
-    minutes20: '20 min',
-    minutes40: '40 min',
-    minutes60: '60 min',
-    minutes120: '120 min',
-    lectureLanguage: 'Lecture language',
-    createLecture: 'Create lecture',
+    library:
+      'Library',
 
-    aiPoem: 'AI Poem',
-    poemPrompt: 'Poem prompt',
-    poemPromptPlaceholder: 'Describe exactly what you want: theme, number of verses, language, style, mood, Sanskrit terms, Bengali, English, Slovenian, etc.',
-    createPoem: 'Create poem',
+    search:
+      'Search',
 
-    askBooks: 'Ask the Books',
-    askQuestion: 'Question',
-    askQuestionPlaceholder: 'Ask for a summary, comparison, explanation, specific facts, textual details, or anything else about the selected books…',
-    askDescription: 'Ask anything about the selected PDF books. The answer is based only on the library source material.',
-    askBooksButton: 'Ask the Books',
-    answer: 'Answer',
-    answerPreparing: 'AI is searching the books and preparing your answer…',
-    answerNotCreated: 'The answer has not been created yet.',
-    noAnswer: 'The AI could not create an answer.',
-    sourceMaterialOnly: 'Answers are based only on the selected PDF books.',
+    create:
+      'Create',
 
-    works: 'Works',
-    noSavedWorks: 'No generated works yet.',
-    lectureWork: 'Lecture',
-    poemWork: 'Poem',
-    askWork: 'Book question',
-    created: 'Created',
-    deleteWork: 'Delete',
-    openWork: 'Open',
-    downloadWork: 'Download',
+    saved:
+      'My works',
 
-    aiNotConnected: 'AI generation will be connected next.'
+    books:
+      'Loaded books',
+
+    titles:
+      'titles',
+
+    continue:
+      'Continue',
+
+    sources:
+      'Sources',
+
+    findSources:
+      'Find sources',
+
+    remove:
+      'Remove',
+
+    intent:
+      'Intent',
+
+    form:
+      'Form',
+
+    generateWork:
+      'Generate a work',
+
+    generate:
+      'Generate',
+
+    generatedWork:
+      'Generated work',
+
+    from:
+      'From',
+
+    saveWork:
+      'Save work',
+
+    allBooks:
+      'All books',
+
+    passages:
+      'passages',
+
+    acrossBooks:
+      'Search loaded books…',
+
+    endSection:
+      'End of section',
+
+    english:
+      'English',
+
+    slovenian:
+      'Slovenščina',
+
+    noResults:
+      'No passages found',
+
+    searching:
+      'Preparing the library search…',
+
+    reader:
+      'Reader',
+
+    loading:
+      'Loading…',
+
+    openPdf:
+      'Open PDF',
+
+    openPage:
+      'Open page',
+
+    pagesIndexed:
+      'indexed pages',
+
+    preparingSearch:
+      'Preparing search index…',
+
+    searchReady:
+      'Library search ready',
+
+    rebuildingSearch:
+      'Building the library index…',
+
+    indexedPages:
+      'Indexed pages',
+
+    searchHint:
+      'Search the text of the loaded PDF books.',
+
+
+    aiLecture:
+      'AI Lecture',
+
+    chooseBooks:
+      'Choose books',
+
+    selectedBooks:
+      'selected',
+
+    lectureTopic:
+      'Lecture topic',
+
+    lectureTopicPlaceholder:
+      'What should the lecture explain?',
+
+    lectureLength:
+      'Lecture length',
+
+    minutes10:
+      '10 min',
+
+    minutes20:
+      '20 min',
+
+    minutes40:
+      '40 min',
+
+    minutes60:
+      '60 min',
+
+    minutes120:
+      '120 min',
+
+    lectureLanguage:
+      'Lecture language',
+
+    createLecture:
+      'Create lecture',
+
+
+    aiPoem:
+      'AI Poem',
+
+    poemPrompt:
+      'Poem prompt',
+
+    poemPromptPlaceholder:
+      'Describe exactly what you want: theme, number of verses, language, style, mood, terms, structure, etc.',
+
+    createPoem:
+      'Create poem',
+
+
+    askBooks:
+      'Ask the Books',
+
+    askQuestion:
+      'Question',
+
+    askQuestionPlaceholder:
+      'Ask for a summary, comparison, explanation, specific facts, textual details, or anything else about the selected books…',
+
+    askDescription:
+      'Ask anything about the selected PDF books. The answer is based only on the library source material.',
+
+    askBooksButton:
+      'Ask the Books',
+
+    answer:
+      'Answer',
+
+    answerPreparing:
+      'AI is searching the books and preparing your answer…',
+
+    answerNotCreated:
+      'The answer has not been created yet.',
+
+    noAnswer:
+      'The AI could not create an answer.',
+
+    sourceMaterialOnly:
+      'Answers are based only on the selected PDF books.',
+
+
+    works:
+      'Works',
+
+    noSavedWorks:
+      'No generated works yet.',
+
+    lectureWork:
+      'Lecture',
+
+    poemWork:
+      'Poem',
+
+    askWork:
+      'Book question',
+
+    created:
+      'Created',
+
+    deleteWork:
+      'Delete',
+
+    openWork:
+      'Open',
+
+    downloadWork:
+      'Download',
+
+    bookmark:
+      'Bookmark',
+
+    bookmarked:
+      'Bookmarked',
+
+    removed:
+      'Removed',
+
+    noBookmarks:
+      'No bookmarks yet.',
+
+    openBookmark:
+      'Open',
+
+    removeBookmark:
+      'Remove bookmark',
+
+    backToLibrary:
+      'Back to Library',
+
+    aiNotConnected:
+      'AI generation is not connected yet.',
+
+    noBooks:
+      'No PDF books have been loaded yet.',
+
+    githubError:
+      'The library books could not be loaded from GitHub.',
+
+    chooseAtLeastOne:
+      'Please select at least one book.',
+
+    missingTopic:
+      'Please enter a lecture topic.',
+
+    missingPoem:
+      'Please enter a poem prompt.',
+
+    missingQuestion:
+      'Please enter a question.',
+
+    noRelevantPages:
+      'No relevant passages were found in the selected books.',
+
+    answerError:
+      'Could not create the answer.',
+
+    lectureError:
+      'Could not create the lecture.',
+
+    poemError:
+      'Could not create the poem.'
+
   },
 
 
   sl: {
-    library: 'Knjižnica',
-    search: 'Iskanje',
-    create: 'Ustvari',
-    saved: 'Moja dela',
-    books: 'Naložene knjige',
-    titles: 'naslovov',
-    collections: 'Zbirke',
-    continue: 'Nadaljuj',
-    sources: 'Viri',
-    findSources: 'Poišči vire',
-    remove: 'Odstrani',
-    intent: 'Namen',
-    form: 'Oblika',
-    generateWork: 'Ustvari delo',
-    generate: 'Ustvari',
-    generatedWork: 'Ustvarjeno delo',
-    from: 'Iz',
-    saveWork: 'Shrani delo',
-    allBooks: 'Vse knjige',
-    passages: 'odlomkov',
-    acrossBooks: 'Išči po naloženih knjigah…',
-    endSection: 'Konec odseka',
-    versesMarked: 'označenih verzov',
-    firstIllumination: 'Prva iluminacija',
-    newBook: 'Nova knjiga',
-    poeticRecitation: 'Pesniška recitacija',
-    songLyrics: 'Besedilo pesmi',
-    studyNotes: 'Študijski zapiski',
-    dailyReflection: 'Dnevni razmislek',
-    classOutline: 'Oris predavanja',
-    readingSelected: 'Branje izbranih virov',
-    gathering: 'Iskanje ustreznih odlomkov',
-    composing: 'Sestavljanje v izbrani obliki',
-    assembling: 'Pripravljanje seznama virov',
-    savedToWorks: 'Shranjeno med Moja dela',
-    english: 'English',
-    slovenian: 'Slovenščina',
-    sourcesCount: 'virov',
-    draft: 'osnutek',
-    noResults: 'Odlomkov ni bilo mogoče najti',
-    searching: 'Pripravljam iskanje po knjižnici…',
-    defaultIntent: 'Za nedeljski razred začetnikov. Ohranite sanskrtske izraze, vendar vsakega razložite.',
-    sampleBook: 'Vzorčna knjiga',
-    chapters: 'poglavij',
-    chapter: 'Poglavje',
-    previous: 'Prejšnje',
-    next: 'Naslednje',
-    loading: 'Nalaganje knjige…',
-    bookLoaded: 'Knjiga naložena',
-    reader: 'Bralnik',
-    showScript: 'Prikaži sanskrt',
-    hideScript: 'Skrij sanskrt',
-    bookmark: 'Zaznamek',
-    bookmarked: 'Zaznamovano',
-    removed: 'Zaznamek odstranjen',
-    loadingFailed: 'Vzorčne knjige ni bilo mogoče naložiti.',
-    backToLibrary: 'Nazaj v knjižnico',
-    noBookmarks: 'Zaenkrat ni zaznamkov.',
-    openBookmark: 'Odpri',
-    removeBookmark: 'Odstrani zaznamek',
-    savedWorks: 'Shranjena dela',
-    resultIn: 'v',
-    chapterResult: 'Poglavje',
-    searchHint: 'Išči po sanskrtu, transliteraciji, angleškem ali slovenskem besedilu.',
-    openPdf: 'Odpri PDF',
-    choosePart: 'Izberi del',
-    adiLila: 'Ādi-līlā',
-    madhyaLila: 'Madhya-līlā',
-    antyaLila: 'Antya-līlā',
-    pagesIndexed: 'indeksiranih strani',
-    preparingSearch: 'Pripravljam iskalni indeks…',
-    searchReady: 'Iskanje po knjižnici je pripravljeno',
-    rebuildingSearch: 'Gradim indeks knjižnice…',
-    pdfPage: 'PDF · stran',
-    openPage: 'Odpri stran',
-    indexedPages: 'Indeksirane strani',
 
-    aiLecture: 'AI predavanje',
-    chooseBooks: 'Izberi knjige',
-    selectedBooks: 'izbranih',
-    lectureTopic: 'Tema predavanja',
-    lectureTopicPlaceholder: 'Kaj naj predavanje razloži?',
-    lectureLength: 'Dolžina predavanja',
-    minutes10: '10 min',
-    minutes20: '20 min',
-    minutes40: '40 min',
-    minutes60: '60 min',
-    minutes120: '120 min',
-    lectureLanguage: 'Jezik predavanja',
-    createLecture: 'Ustvari predavanje',
+    library:
+      'Knjižnica',
 
-    aiPoem: 'AI pesem',
-    poemPrompt: 'Navodilo za pesem',
-    poemPromptPlaceholder: 'Opiši vse, kar želiš: temo, število verzov, jezik, slog, razpoloženje, sanskrtske izraze, bengalščino, angleščino, slovenščino itd.',
-    createPoem: 'Ustvari pesem',
+    search:
+      'Iskanje',
 
-    askBooks: 'Vprašaj knjige',
-    askQuestion: 'Vprašanje',
-    askQuestionPlaceholder: 'Vprašaj za povzetek, primerjavo, razlago, konkretne podatke, besedilne podrobnosti ali karkoli drugega o izbranih knjigah…',
-    askDescription: 'Postavi kakršnokoli vprašanje o vsebini izbranih PDF knjig. Odgovor temelji samo na knjižničnem gradivu.',
-    askBooksButton: 'Vprašaj knjige',
-    answer: 'Odgovor',
-    answerPreparing: 'AI išče po knjigah in pripravlja odgovor…',
-    answerNotCreated: 'Odgovor še ni ustvarjen.',
-    noAnswer: 'AI ni mogel ustvariti odgovora.',
-    sourceMaterialOnly: 'Odgovori temeljijo samo na izbranih PDF knjigah.',
+    create:
+      'Ustvari',
 
-    works: 'Dela',
-    noSavedWorks: 'Zaenkrat še ni ustvarjenih del.',
-    lectureWork: 'Predavanje',
-    poemWork: 'Pesem',
-    askWork: 'Vprašanje knjig',
-    created: 'Ustvarjeno',
-    deleteWork: 'Izbriši',
-    openWork: 'Odpri',
-    downloadWork: 'Prenesi',
+    saved:
+      'Moja dela',
 
-    aiNotConnected: 'AI generiranje bomo povezali v naslednjem koraku.'
+    books:
+      'Naložene knjige',
+
+    titles:
+      'naslovov',
+
+    continue:
+      'Nadaljuj',
+
+    sources:
+      'Viri',
+
+    findSources:
+      'Poišči vire',
+
+    remove:
+      'Odstrani',
+
+    intent:
+      'Namen',
+
+    form:
+      'Oblika',
+
+    generateWork:
+      'Ustvari delo',
+
+    generate:
+      'Ustvari',
+
+    generatedWork:
+      'Ustvarjeno',
+
+    from:
+      'Iz',
+
+    saveWork:
+      'Shrani delo',
+
+    allBooks:
+      'Vse knjige',
+
+    passages:
+      'odlomkov',
+
+    acrossBooks:
+      'Išči po naloženih knjigah…',
+
+    endSection:
+      'Konec',
+
+    english:
+      'English',
+
+    slovenian:
+      'Slovenščina',
+
+    noResults:
+      'Odlomkov ni bilo mogoče najti',
+
+    searching:
+      'Pripravljam iskanje po knjižnici…',
+
+    reader:
+      'Bralnik',
+
+    loading:
+      'Nalaganje…',
+
+    openPdf:
+      'Odpri PDF',
+
+    openPage:
+      'Odpri stran',
+
+    pagesIndexed:
+      'indeksiranih strani',
+
+    preparingSearch:
+      'Pripravljam iskalni indeks…',
+
+    searchReady:
+      'Iskanje po knjižnici je pripravljeno',
+
+    rebuildingSearch:
+      'Gradim indeks knjižnice…',
+
+    indexedPages:
+      'Indeksirane strani',
+
+    searchHint:
+      'Išči po besedilu naloženih PDF knjig.',
+
+
+    aiLecture:
+      'AI predavanje',
+
+    chooseBooks:
+      'Izberi knjige',
+
+    selectedBooks:
+      'izbranih',
+
+    lectureTopic:
+      'Tema predavanja',
+
+    lectureTopicPlaceholder:
+      'Kaj naj predavanje razloži?',
+
+    lectureLength:
+      'Dolžina predavanja',
+
+    minutes10:
+      '10 min',
+
+    minutes20:
+      '20 min',
+
+    minutes40:
+      '40 min',
+
+    minutes60:
+      '60 min',
+
+    minutes120:
+      '120 min',
+
+    lectureLanguage:
+      'Jezik predavanja',
+
+    createLecture:
+      'Ustvari predavanje',
+
+
+    aiPoem:
+      'AI pesem',
+
+    poemPrompt:
+      'Navodilo za pesem',
+
+    poemPromptPlaceholder:
+      'Opiši, kaj želiš: temo, število verzov, jezik, slog, razpoloženje, izraze, strukturo itd.',
+
+    createPoem:
+      'Ustvari pesem',
+
+
+    askBooks:
+      'Vprašaj knjige',
+
+    askQuestion:
+      'Vprašanje',
+
+    askQuestionPlaceholder:
+      'Vprašaj za povzetek, primerjavo, razlago, konkretne podatke, besedilne podrobnosti ali karkoli drugega o izbranih knjigah…',
+
+    askDescription:
+      'Postavi kakršnokoli vprašanje o vsebini izbranih PDF knjig. Odgovor temelji samo na knjižničnem gradivu.',
+
+    askBooksButton:
+      'Vprašaj knjige',
+
+    answer:
+      'Odgovor',
+
+    answerPreparing:
+      'AI išče po knjigah in pripravlja odgovor…',
+
+    answerNotCreated:
+      'Odgovor še ni ustvarjen.',
+
+    noAnswer:
+      'AI ni mogel ustvariti odgovora.',
+
+    sourceMaterialOnly:
+      'Odgovori temeljijo samo na izbranih PDF knjigah.',
+
+
+    works:
+      'Dela',
+
+    noSavedWorks:
+      'Zaenkrat še ni ustvarjenih del.',
+
+    lectureWork:
+      'Predavanje',
+
+    poemWork:
+      'Pesem',
+
+    askWork:
+      'Vprašanje knjig',
+
+    created:
+      'Ustvarjeno',
+
+    deleteWork:
+      'Izbriši',
+
+    openWork:
+      'Odpri',
+
+    downloadWork:
+      'Prenesi',
+
+    bookmark:
+      'Zaznamek',
+
+    bookmarked:
+      'Zaznamovano',
+
+    removed:
+      'Odstranjeno',
+
+    noBookmarks:
+      'Zaenkrat ni zaznamkov.',
+
+    openBookmark:
+      'Odpri',
+
+    removeBookmark:
+      'Odstrani zaznamek',
+
+    backToLibrary:
+      'Nazaj v knjižnico',
+
+    aiNotConnected:
+      'AI generiranje še ni povezano.',
+
+    noBooks:
+      'Zaenkrat ni naloženih PDF knjig.',
+
+    githubError:
+      'Knjig iz GitHuba ni bilo mogoče naložiti.',
+
+    chooseAtLeastOne:
+      'Najprej izberi vsaj eno knjigo.',
+
+    missingTopic:
+      'Najprej vpiši temo predavanja.',
+
+    missingPoem:
+      'Najprej napiši navodilo za pesem.',
+
+    missingQuestion:
+      'Najprej napiši vprašanje.',
+
+    noRelevantPages:
+      'V izbranih knjigah ni bilo mogoče najti ustreznih odlomkov.',
+
+    answerError:
+      'Odgovora ni bilo mogoče ustvariti.',
+
+    lectureError:
+      'Predavanja ni bilo mogoče ustvariti.',
+
+    poemError:
+      'Pesmi ni bilo mogoče ustvariti.'
+
   }
+
 };
 
+
+/* =========================================================
+   STATE
+   ========================================================= */
 
 let state = {
-  screen: 'library',
-  book: 0,
-  query: '',
-  filter: 'All books',
-  form: 'Article',
-  sources: [0, 1, 2, 3],
-  script: true,
-  toast: '',
-  working: false,
-  step: 0,
-  intent: 'For a Sunday class of newcomers. Keep the Sanskrit terms but explain each one.',
-  lang: 'en',
-  loadedBook: null,
-  loadedBookId: null,
-  chapter: 0,
-  bookmarks: [],
-  searchIndex: [],
-  searchReady: false,
-  searchLoading: false,
 
-  lectureTopic: '',
-  lectureLength: '20',
-  lectureGenerating: false,
-  generatedLecture: '',
-  lectureError: '',
-  lecturePassages: [],
+  screen:
+    'library',
 
-  poemPrompt: '',
-  poemGenerating: false,
-  generatedPoem: '',
-  poemError: '',
-  poemPassages: [],
+  book:
+    0,
 
-  askPrompt: '',
-  askGenerating: false,
-  generatedAnswer: '',
-  askError: '',
-  askPassages: [],
+  query:
+    '',
 
-  creationType: 'lecture',
+  filter:
+    'All books',
 
-  works: []
+  sources:
+    [],
+
+  script:
+    true,
+
+  toast:
+    '',
+
+  lang:
+    'en',
+
+  searchIndex:
+    [],
+
+  searchReady:
+    false,
+
+  searchLoading:
+    false,
+
+  lectureTopic:
+    '',
+
+  lectureLength:
+    '20',
+
+  lectureGenerating:
+    false,
+
+  generatedLecture:
+    '',
+
+  lectureError:
+    '',
+
+  lecturePassages:
+    [],
+
+  poemPrompt:
+    '',
+
+  poemGenerating:
+    false,
+
+  generatedPoem:
+    '',
+
+  poemError:
+    '',
+
+  poemPassages:
+    [],
+
+  askPrompt:
+    '',
+
+  askGenerating:
+    false,
+
+  generatedAnswer:
+    '',
+
+  askError:
+    '',
+
+  askPassages:
+    [],
+
+  creationType:
+    'lecture',
+
+  works:
+    [],
+
+  bookmarks:
+    []
+
 };
 
+
+/* =========================================================
+   LOAD LOCAL STATE
+   ========================================================= */
 
 try {
 
-  Object.assign(
-    state,
+  const saved =
     JSON.parse(
       localStorage.getItem(
-        'rb-state'
+        'universal-ai-library-state'
       ) || '{}'
-    )
+    );
+
+
+  Object.assign(
+    state,
+    saved
   );
 
-} catch (e) {}
+} catch (error) {
 
+  console.warn(
+    'Could not load saved state.',
+    error
+  );
 
-if (!state.lang) {
-  state.lang = 'en';
 }
 
 
-if (!Array.isArray(state.bookmarks)) {
-  state.bookmarks = [];
+/* =========================================================
+   STATE VALIDATION
+   ========================================================= */
+
+if (
+  state.lang !== 'en' &&
+  state.lang !== 'sl'
+) {
+
+  state.lang =
+    'en';
+
 }
 
 
-if (!Array.isArray(state.sources)) {
-  state.sources = [0, 1, 2, 3];
+if (
+  !Array.isArray(
+    state.sources
+  )
+) {
+
+  state.sources =
+    [];
+
 }
 
 
-if (!Array.isArray(state.works)) {
-  state.works = [];
+if (
+  !Array.isArray(
+    state.works
+  )
+) {
+
+  state.works =
+    [];
+
+}
+
+
+if (
+  !Array.isArray(
+    state.bookmarks
+  )
+) {
+
+  state.bookmarks =
+    [];
+
+}
+
+
+if (
+  !Array.isArray(
+    state.lecturePassages
+  )
+) {
+
+  state.lecturePassages =
+    [];
+
+}
+
+
+if (
+  !Array.isArray(
+    state.poemPassages
+  )
+) {
+
+  state.poemPassages =
+    [];
+
+}
+
+
+if (
+  !Array.isArray(
+    state.askPassages
+  )
+) {
+
+  state.askPassages =
+    [];
+
 }
 
 
 state.lectureLength =
   String(
-    state.lectureLength || '20'
+    state.lectureLength ||
+    '20'
   );
 
 
 if (
-  typeof state.lectureTopic !==
-  'string'
+  state.creationType !==
+    'lecture' &&
+  state.creationType !==
+    'poem' &&
+  state.creationType !==
+    'ask'
 ) {
-  state.lectureTopic = '';
-}
 
+  state.creationType =
+    'lecture';
 
-if (
-  typeof state.lectureGenerating !==
-  'boolean'
-) {
-  state.lectureGenerating = false;
-}
-
-
-if (
-  typeof state.generatedLecture !==
-  'string'
-) {
-  state.generatedLecture = '';
-}
-
-
-if (
-  typeof state.lectureError !==
-  'string'
-) {
-  state.lectureError = '';
-}
-
-
-if (!Array.isArray(state.lecturePassages)) {
-  state.lecturePassages = [];
-}
-
-
-if (
-  typeof state.poemPrompt !==
-  'string'
-) {
-  state.poemPrompt = '';
-}
-
-
-if (
-  typeof state.poemGenerating !==
-  'boolean'
-) {
-  state.poemGenerating = false;
-}
-
-
-if (
-  typeof state.generatedPoem !==
-  'string'
-) {
-  state.generatedPoem = '';
-}
-
-
-if (
-  typeof state.poemError !==
-  'string'
-) {
-  state.poemError = '';
-}
-
-
-if (!Array.isArray(state.poemPassages)) {
-  state.poemPassages = [];
-}
-
-
-if (
-  typeof state.askPrompt !==
-  'string'
-) {
-  state.askPrompt = '';
-}
-
-
-if (
-  typeof state.askGenerating !==
-  'boolean'
-) {
-  state.askGenerating = false;
-}
-
-
-if (
-  typeof state.generatedAnswer !==
-  'string'
-) {
-  state.generatedAnswer = '';
-}
-
-
-if (
-  typeof state.askError !==
-  'string'
-) {
-  state.askError = '';
-}
-
-
-if (!Array.isArray(state.askPassages)) {
-  state.askPassages = [];
-}
-
-
-if (
-  state.creationType !== 'poem' &&
-  state.creationType !== 'lecture' &&
-  state.creationType !== 'ask'
-) {
-  state.creationType = 'lecture';
 }
 
 
@@ -591,10 +855,14 @@ if (
    GENERAL
    ========================================================= */
 
-function t(key) {
+function t(
+  key
+) {
 
   return (
-    I18N[state.lang]?.[key] ||
+    I18N[
+      state.lang
+    ]?.[key] ||
     I18N.en[key] ||
     key
   );
@@ -602,13 +870,16 @@ function t(key) {
 }
 
 
+/* =========================================================
+   PDF URL
+   ========================================================= */
+
 function githubRawPdfUrl(
   filename
 ) {
 
   return (
-    'https://raw.githubusercontent.com/' +
-    'vcasopis/raganugagemini/main/books/' +
+    GITHUB_RAW_BASE +
     encodeURIComponent(
       filename
     )
@@ -618,7 +889,7 @@ function githubRawPdfUrl(
 
 
 /* =========================================================
-   LOAD BOOKS AUTOMATICALLY FROM GITHUB
+   LOAD BOOKS FROM GITHUB
    ========================================================= */
 
 async function loadBooksFromGitHub() {
@@ -631,7 +902,9 @@ async function loadBooksFromGitHub() {
           '?_=' +
           Date.now(),
         {
-          cache: 'no-store',
+          cache:
+            'no-store',
+
           headers: {
             Accept:
               'application/vnd.github+json'
@@ -654,10 +927,14 @@ async function loadBooksFromGitHub() {
       await response.json();
 
 
-    if (!Array.isArray(files)) {
+    if (
+      !Array.isArray(
+        files
+      )
+    ) {
 
       throw new Error(
-        'GitHub API ni vrnil seznama datotek.'
+        'GitHub did not return a file list.'
       );
 
     }
@@ -667,130 +944,87 @@ async function loadBooksFromGitHub() {
       files.filter(
         file =>
           file &&
-          file.type === 'file' &&
+          file.type ===
+            'file' &&
           /\.pdf$/i.test(
-            file.name || ''
+            file.name ||
+            ''
           )
       );
-
-
-    const loadedBooks = [];
-
-
-    LEGACY_BOOKS.forEach(
-      legacy => {
-
-        const file =
-          pdfFiles.find(
-            item =>
-              item.name ===
-              legacy.filename
-          );
-
-
-        if (!file) {
-          return;
-        }
-
-
-        loadedBooks.push({
-
-          id:
-            legacy.id,
-
-          short:
-            legacy.short,
-
-          author:
-            legacy.author,
-
-          script:
-            legacy.script,
-
-          pdf:
-            file.download_url ||
-            githubRawPdfUrl(
-              file.name
-            )
-
-        });
-
-      }
-    );
-
-
-    pdfFiles.forEach(
-      file => {
-
-        const isLegacy =
-          LEGACY_BOOKS.some(
-            legacy =>
-              legacy.filename ===
-              file.name
-          );
-
-
-        if (isLegacy) {
-          return;
-        }
-
-
-        const title =
-          String(
-            file.name || ''
-          )
-          .replace(
-            /\.pdf$/i,
-            ''
-          );
-
-
-        loadedBooks.push({
-
-          id:
-            'pdf-' +
-            encodeURIComponent(
-              file.name
-            ),
-
-          short:
-            title,
-
-          author:
-            '',
-
-          script:
-            'PDF',
-
-          pdf:
-            file.download_url ||
-            githubRawPdfUrl(
-              file.name
-            )
-
-        });
-
-      }
-    );
 
 
     BOOKS =
-      loadedBooks.sort(
-        (a, b) =>
-          String(
-            a.short || ''
-          ).localeCompare(
-            String(
-              b.short || ''
-            ),
-            undefined,
-            {
-              sensitivity:
-                'base'
-            }
-          )
-      );
+      pdfFiles
+        .map(
+          file => {
 
+            const title =
+              String(
+                file.name ||
+                ''
+              )
+                .replace(
+                  /\.pdf$/i,
+                  ''
+                );
+
+
+            return {
+
+              id:
+                'pdf-' +
+                encodeURIComponent(
+                  file.name
+                ),
+
+              short:
+                title,
+
+              author:
+                '',
+
+              script:
+                'PDF',
+
+              filename:
+                file.name,
+
+              pdf:
+                file.download_url ||
+                githubRawPdfUrl(
+                  file.name
+                )
+
+            };
+
+          }
+        )
+        .sort(
+          (
+            a,
+            b
+          ) =>
+            String(
+              a.short ||
+              ''
+            ).localeCompare(
+              String(
+                b.short ||
+                ''
+              ),
+              undefined,
+              {
+                sensitivity:
+                  'base'
+              }
+            )
+        );
+
+
+    /*
+     * Vse trenutno naložene knjige
+     * postanejo privzeto izbrane.
+     */
 
     state.sources =
       BOOKS.map(
@@ -802,7 +1036,8 @@ async function loadBooksFromGitHub() {
 
 
     if (
-      BOOKS.length > 0
+      BOOKS.length >
+      0
     ) {
 
       state.book =
@@ -812,7 +1047,8 @@ async function loadBooksFromGitHub() {
             Number(
               state.book
             ) || 0,
-            BOOKS.length - 1
+            BOOKS.length -
+              1
           )
         );
 
@@ -824,35 +1060,33 @@ async function loadBooksFromGitHub() {
     }
 
 
+    /*
+     * Poskrbimo za čist indeks.
+     */
+
+    state.searchReady =
+      false;
+
+    state.searchLoading =
+      false;
+
+    state.searchIndex =
+      [];
+
+
     save();
     render();
 
 
-    if (
-      state.screen ===
-      'search'
-    ) {
-
-      state.searchReady =
-        false;
-
-      state.searchIndex =
-        [];
-
-      buildSearchIndex();
-
-    }
-
-
     console.log(
-      'Rāgānugā Library:',
+      'Universal AI Library:',
       BOOKS.length,
       'books loaded.'
     );
 
 
     console.log(
-      'Rāgānugā Library PDF files:',
+      'PDF files:',
       pdfFiles.map(
         file =>
           file.name
@@ -869,37 +1103,19 @@ async function loadBooksFromGitHub() {
 
 
     BOOKS =
-      LEGACY_BOOKS.map(
-        legacy => ({
-
-          id:
-            legacy.id,
-
-          short:
-            legacy.short,
-
-          author:
-            legacy.author,
-
-          script:
-            legacy.script,
-
-          pdf:
-            githubRawPdfUrl(
-              legacy.filename
-            )
-
-        })
-      );
+      [];
 
 
     state.sources =
-      BOOKS.map(
-        (
-          book,
-          index
-        ) => index
-      );
+      [];
+
+
+    state.searchReady =
+      false;
+
+
+    state.searchIndex =
+      [];
 
 
     save();
@@ -907,9 +1123,9 @@ async function loadBooksFromGitHub() {
 
 
     toast(
-      state.lang === 'sl'
-        ? 'Stare knjige so naložene; novih iz GitHuba trenutno ni bilo mogoče prebrati.'
-        : 'The existing books are loaded; new GitHub books could not be read.'
+      t(
+        'githubError'
+      )
     );
 
   }
@@ -939,41 +1155,14 @@ function save() {
       filter:
         state.filter,
 
-      form:
-        state.form,
-
       sources:
         state.sources,
 
       script:
         state.script,
 
-      toast:
-        state.toast,
-
-      working:
-        state.working,
-
-      step:
-        state.step,
-
-      intent:
-        state.intent,
-
       lang:
         state.lang,
-
-      loadedBook:
-        state.loadedBook,
-
-      loadedBookId:
-        state.loadedBookId,
-
-      chapter:
-        state.chapter,
-
-      bookmarks:
-        state.bookmarks,
 
       lectureTopic:
         state.lectureTopic,
@@ -1018,13 +1207,16 @@ function save() {
         state.creationType,
 
       works:
-        state.works
+        state.works,
+
+      bookmarks:
+        state.bookmarks
 
     };
 
 
     localStorage.setItem(
-      'rb-state',
+      'universal-ai-library-state',
       JSON.stringify(
         savedState
       )
@@ -1033,7 +1225,7 @@ function save() {
   } catch (error) {
 
     console.warn(
-      'Could not save app state:',
+      'Could not save state.',
       error
     );
 
@@ -1046,10 +1238,13 @@ function save() {
    ESCAPING
    ========================================================= */
 
-function escapeHtml(value) {
+function escapeHtml(
+  value
+) {
 
   return String(
-    value ?? ''
+    value ??
+    ''
   )
     .replace(
       /&/g,
@@ -1075,10 +1270,13 @@ function escapeHtml(value) {
 }
 
 
-function escapeAttribute(value) {
+function escapeAttribute(
+  value
+) {
 
   return String(
-    value ?? ''
+    value ??
+    ''
   )
     .replace(
       /\\/g,
@@ -1096,16 +1294,22 @@ function escapeAttribute(value) {
    LANGUAGE
    ========================================================= */
 
-function setLanguage(lang) {
+function setLanguage(
+  lang
+) {
+
+  if (
+    lang !== 'en' &&
+    lang !== 'sl'
+  ) {
+
+    return;
+
+  }
+
 
   state.lang =
     lang;
-
-
-  state.intent =
-    lang === 'sl'
-      ? I18N.sl.defaultIntent
-      : I18N.en.defaultIntent;
 
 
   save();
@@ -1118,23 +1322,9 @@ function setLanguage(lang) {
    NAVIGATION
    ========================================================= */
 
-function go(screen) {
-
-  if (
-    typeof searchFocusFrame !==
-      'undefined' &&
-    searchFocusFrame !== null
-  ) {
-
-    cancelAnimationFrame(
-      searchFocusFrame
-    );
-
-    searchFocusFrame =
-      null;
-
-  }
-
+function go(
+  screen
+) {
 
   state.screen =
     screen;
@@ -1146,7 +1336,8 @@ function go(screen) {
 
   window.scrollTo({
 
-    top: 0,
+    top:
+      0,
 
     behavior:
       'smooth'
@@ -1160,7 +1351,9 @@ function go(screen) {
    TOAST
    ========================================================= */
 
-function toast(message) {
+function toast(
+  message
+) {
 
   state.toast =
     message;
@@ -1197,7 +1390,8 @@ function languageSelector() {
       <button
         type="button"
         class="chip ${
-          state.lang === 'en'
+          state.lang ===
+          'en'
             ? 'on'
             : ''
         }"
@@ -1213,7 +1407,8 @@ function languageSelector() {
       <button
         type="button"
         class="chip ${
-          state.lang === 'sl'
+          state.lang ===
+          'sl'
             ? 'on'
             : ''
         }"
@@ -1276,7 +1471,8 @@ function nav() {
             <button
               type="button"
               class="${
-                state.screen === key
+                state.screen ===
+                key
                   ? 'active'
                   : ''
               }"
@@ -1307,7 +1503,9 @@ function nav() {
    LAYOUT
    ========================================================= */
 
-function layout(body) {
+function layout(
+  body
+) {
 
   return `
 
@@ -1330,11 +1528,15 @@ function layout(body) {
         ${
           state.toast
             ? `
+
               <div class="toast">
+
                 ${escapeHtml(
                   state.toast
                 )}
+
               </div>
+
             `
             : ''
         }
@@ -1365,7 +1567,7 @@ function library() {
 
     <h1>
 
-      Rāgānugā Bhakti
+      AI Book Library
 
     </h1>
 
@@ -1429,27 +1631,6 @@ function library() {
 
                       </strong>
 
-
-                      ${
-                        book.author
-                          ? `
-                            <div
-                              class="muted"
-                              style="
-                                margin-top:8px;
-                                font-size:12px;
-                                line-height:1.4
-                              ">
-
-                              ${escapeHtml(
-                                book.author
-                              )}
-
-                            </div>
-                          `
-                          : ''
-                      }
-
                     </div>
 
                   </div>
@@ -1469,7 +1650,16 @@ function library() {
                 padding:20px 0
               ">
 
-              ${t('loading')}
+              ${
+                BOOKS.length ===
+                0
+                  ? t(
+                      'noBooks'
+                    )
+                  : t(
+                      'loading'
+                    )
+              }
 
             </div>
 
@@ -1484,21 +1674,17 @@ function library() {
 
 
 /* =========================================================
-   BOOK OPENING
+   OPEN BOOK
    ========================================================= */
 
-function openBook(index) {
-
-  state.book =
-    index;
-
-
-  state.chapter =
-    0;
-
+function openBook(
+  index
+) {
 
   const book =
-    BOOKS[index];
+    BOOKS[
+      index
+    ];
 
 
   if (!book) {
@@ -1506,53 +1692,16 @@ function openBook(index) {
   }
 
 
-  if (book.sample) {
-
-    loadSampleBook();
-
-    return;
-
-  }
+  state.book =
+    index;
 
 
-  if (
-    Array.isArray(
-      book.pdfs
-    ) &&
-    book.pdfs.length
-  ) {
-
-    state.screen =
-      'reader';
+  state.screen =
+    'reader';
 
 
-    save();
-    render();
-
-
-    return;
-
-  }
-
-
-  if (book.pdf) {
-
-    save();
-
-
-    window.open(
-      book.pdf,
-      '_blank',
-      'noopener,noreferrer'
-    );
-
-
-    return;
-
-  }
-
-
-  go('reader');
+  save();
+  render();
 
 }
 
@@ -1593,554 +1742,18 @@ function openPdf(
 
 
 /* =========================================================
-   LOAD SAMPLE BOOK
-   ========================================================= */
-
-async function loadSampleBook() {
-
-  state.loadedBook =
-    null;
-
-
-  state.loadedBookId =
-    'sample-book';
-
-
-  state.screen =
-    'reader';
-
-
-  save();
-  render();
-
-
-  try {
-
-    const response =
-      await fetch(
-        'data/sample-book.json',
-        {
-          cache:
-            'no-store'
-        }
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        'HTTP ' +
-        response.status
-      );
-
-    }
-
-
-    const data =
-      await response.json();
-
-
-    state.loadedBook =
-      data;
-
-
-    state.loadedBookId =
-      data.id ||
-      'sample-book';
-
-
-    if (
-      state.chapter < 0 ||
-      state.chapter >=
-        (
-          data.chapters ||
-          []
-        ).length
-    ) {
-
-      state.chapter =
-        0;
-
-    }
-
-
-    save();
-    render();
-
-
-  } catch (error) {
-
-    console.error(
-      'Sample book loading error:',
-      error
-    );
-
-
-    state.loadedBook =
-      FALLBACK_BOOK;
-
-
-    state.loadedBookId =
-      'sample-book';
-
-
-    save();
-    render();
-
-
-    setTimeout(
-      () => {
-
-        toast(
-          t(
-            'loadingFailed'
-          )
-        );
-
-      },
-      100
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   CURRENT BOOK
-   ========================================================= */
-
-function getCurrentBook() {
-
-  const meta =
-    BOOKS[
-      state.book
-    ];
-
-
-  if (!meta) {
-
-    if (
-      state.loadedBook
-    ) {
-
-      return state.loadedBook;
-
-    }
-
-
-    return null;
-
-  }
-
-
-  return {
-
-    id:
-      meta.id ||
-      '',
-
-    title:
-      meta.short ||
-      '',
-
-    author:
-      meta.author ||
-      '',
-
-    language:
-      meta.script ||
-      '',
-
-    chapters:
-      []
-
-  };
-
-}
-
-
-/* =========================================================
-   PROGRESS
-   ========================================================= */
-
-function getProgress(
-  bookIndex
-) {
-
-  const book =
-    BOOKS[
-      bookIndex
-    ];
-
-
-  if (!book) {
-    return 0;
-  }
-
-
-  const value =
-    Number(
-      localStorage.getItem(
-        'rb-progress-' +
-        book.id
-      ) || 0
-    );
-
-
-  return Math.max(
-    0,
-    Math.min(
-      100,
-      value
-    )
-  );
-
-}
-
-
-function setProgress(
-  bookId,
-  value
-) {
-
-  const safeValue =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        Math.round(
-          value
-        )
-      )
-    );
-
-
-  localStorage.setItem(
-    'rb-progress-' +
-      bookId,
-    String(
-      safeValue
-    )
-  );
-
-}
-
-
-function updateReadingProgress() {
-
-  const book =
-    getCurrentBook();
-
-
-  if (
-    !book ||
-    !Array.isArray(
-      book.chapters
-    ) ||
-    book.chapters.length ===
-      0
-  ) {
-
-    return;
-
-  }
-
-
-  const progress =
-    (
-      (
-        state.chapter +
-        1
-      ) /
-      book.chapters.length
-    ) *
-    100;
-
-
-  setProgress(
-    book.id ||
-      'sample-book',
-    progress
-  );
-
-}
-
-
-function currentChapter() {
-
-  const book =
-    getCurrentBook();
-
-
-  if (
-    !book ||
-    !Array.isArray(
-      book.chapters
-    )
-  ) {
-
-    return null;
-
-  }
-
-
-  return (
-    book.chapters[
-      state.chapter
-    ] ||
-    null
-  );
-
-}
-
-
-/* =========================================================
-   BOOKMARKS
-   ========================================================= */
-
-function isBookmarked(ref) {
-
-  return state.bookmarks.some(
-    bookmark =>
-      bookmark.bookId ===
-        state.loadedBookId &&
-      Number(
-        bookmark.chapter
-      ) ===
-        Number(
-          state.chapter
-        ) &&
-      String(
-        bookmark.ref
-      ) ===
-        String(ref)
-  );
-
-}
-
-
-function toggleBookmark(ref) {
-
-  const existing =
-    state.bookmarks.findIndex(
-      bookmark =>
-        bookmark.bookId ===
-          state.loadedBookId &&
-        Number(
-          bookmark.chapter
-        ) ===
-          Number(
-            state.chapter
-          ) &&
-        String(
-          bookmark.ref
-        ) ===
-          String(ref)
-    );
-
-
-  if (existing >= 0) {
-
-    state.bookmarks.splice(
-      existing,
-      1
-    );
-
-
-    save();
-    render();
-
-
-    setTimeout(
-      () => {
-
-        toast(
-          t('removed')
-        );
-
-      },
-      50
-    );
-
-
-    return;
-
-  }
-
-
-  const book =
-    getCurrentBook();
-
-
-  const chapter =
-    currentChapter();
-
-
-  const verse =
-    (
-      chapter?.verses ||
-      []
-    ).find(
-      item =>
-        String(
-          item.ref
-        ) ===
-        String(ref)
-    );
-
-
-  state.bookmarks.push({
-
-    bookId:
-      state.loadedBookId ||
-      book?.id ||
-      'sample-book',
-
-    bookTitle:
-      book?.title ||
-      'Rāgānugā Bhakti — Sample Book',
-
-    author:
-      book?.author ||
-      'Sample Edition',
-
-    chapter:
-      Number(
-        state.chapter
-      ),
-
-    chapterTitle:
-      chapter?.title ||
-      '',
-
-    ref:
-      String(ref),
-
-    english:
-      verse?.english ||
-      '',
-
-    slovenian:
-      verse?.slovenian ||
-      '',
-
-    sanskrit:
-      verse?.sanskrit ||
-      '',
-
-    transliteration:
-      verse?.transliteration ||
-      '',
-
-    created:
-      new Date().toISOString()
-
-  });
-
-
-  save();
-  render();
-
-
-  setTimeout(
-    () => {
-
-      toast(
-        t('bookmarked')
-      );
-
-    },
-    50
-  );
-
-}
-
-
-function previousChapter() {
-
-  if (
-    state.chapter >
-    0
-  ) {
-
-    state.chapter--;
-
-    updateReadingProgress();
-
-    save();
-    render();
-
-
-    window.scrollTo({
-
-      top: 0,
-
-      behavior:
-        'smooth'
-
-    });
-
-  }
-
-}
-
-
-function nextChapter() {
-
-  const book =
-    getCurrentBook();
-
-
-  if (
-    book?.chapters &&
-    state.chapter <
-      book.chapters.length - 1
-  ) {
-
-    state.chapter++;
-
-    updateReadingProgress();
-
-    save();
-    render();
-
-
-    window.scrollTo({
-
-      top: 0,
-
-      behavior:
-        'smooth'
-
-    });
-
-  } else {
-
-    updateReadingProgress();
-
-    toast(
-      t('endSection')
-    );
-
-  }
-
-}
-
-
-/* =========================================================
    READER
    ========================================================= */
 
 function reader() {
 
-  const meta =
+  const book =
     BOOKS[
       state.book
     ];
 
 
-  if (!meta) {
+  if (!book) {
 
     return layout(`
 
@@ -2153,409 +1766,13 @@ function reader() {
 
       <div class="muted">
 
-        ${t('loading')}
+        ${t('noBooks')}
 
       </div>
 
     `);
 
   }
-
-
-  if (
-    Array.isArray(
-      meta.pdfs
-    ) &&
-    meta.pdfs.length
-  ) {
-
-    return layout(`
-
-      <div class="top">
-
-        <button
-          type="button"
-          class="back"
-          onclick="
-            go('library')
-          ">
-
-          ‹
-
-        </button>
-
-
-        <div style="flex:1">
-
-          <strong>
-
-            ${escapeHtml(
-              meta.short
-            )}
-
-          </strong>
-
-
-          ${
-            meta.author
-              ? `
-                <div class="muted">
-
-                  ${escapeHtml(
-                    meta.author
-                  )}
-
-                </div>
-              `
-              : ''
-          }
-
-        </div>
-
-      </div>
-
-
-      <div class="section">
-
-        <div class="eyebrow">
-
-          ${t('reader')}
-
-        </div>
-
-
-        <h2>
-
-          ${escapeHtml(
-            meta.short
-          )}
-
-        </h2>
-
-
-        <p class="muted">
-
-          ${
-            meta.author
-              ? escapeHtml(
-                  meta.author
-                ) +
-                ' · '
-              : ''
-          }
-
-          ${escapeHtml(
-            meta.script
-          )}
-
-        </p>
-
-
-        <h3
-          style="
-            margin-top:24px
-          ">
-
-          ${t('choosePart')}
-
-        </h3>
-
-
-        <div
-          style="
-            display:grid;
-            gap:12px;
-            margin-top:14px
-          ">
-
-          ${meta.pdfs.map(
-            part => `
-
-              <button
-                type="button"
-                class="select"
-                style="
-                  text-align:left;
-                  padding:16px
-                "
-                onclick="
-                  openPdf(
-                    '${escapeAttribute(
-                      part.file
-                    )}'
-                  )
-                ">
-
-                <strong>
-
-                  ${escapeHtml(
-                    part.title
-                  )}
-
-                </strong>
-
-
-                <div
-                  class="muted"
-                  style="
-                    margin-top:4px
-                  ">
-
-                  PDF
-
-                </div>
-
-              </button>
-
-            `
-          ).join('')}
-
-        </div>
-
-      </div>
-
-    `);
-
-  }
-
-
-  if (meta.pdf) {
-
-    return layout(`
-
-      <div class="top">
-
-        <button
-          type="button"
-          class="back"
-          onclick="
-            go('library')
-          ">
-
-          ‹
-
-        </button>
-
-
-        <div style="flex:1">
-
-          <strong>
-
-            ${escapeHtml(
-              meta.short
-            )}
-
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      <div class="section">
-
-        <div class="eyebrow">
-
-          ${t('reader')}
-
-        </div>
-
-
-        <h2>
-
-          ${escapeHtml(
-            meta.short
-          )}
-
-        </h2>
-
-
-        ${
-          meta.author
-            ? `
-              <p class="muted">
-
-                ${escapeHtml(
-                  meta.author
-                )}
-
-              </p>
-            `
-            : ''
-        }
-
-
-        <button
-          type="button"
-          class="primary"
-          onclick="
-            openPdf(
-              '${escapeAttribute(
-                meta.pdf
-              )}'
-            )
-          ">
-
-          ${t('openPdf')}
-
-        </button>
-
-      </div>
-
-    `);
-
-  }
-
-
-  if (
-    meta.sample &&
-    !state.loadedBook
-  ) {
-
-    return layout(`
-
-      <div class="top">
-
-        <button
-          type="button"
-          class="back"
-          onclick="
-            go('library')
-          ">
-
-          ‹
-
-        </button>
-
-
-        <div style="flex:1">
-
-          <strong>
-
-            ${escapeHtml(
-              meta.short
-            )}
-
-          </strong>
-
-
-          <div class="muted">
-
-            ${escapeHtml(
-              meta.author
-            )}
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="working">
-
-        <div class="dot"></div>
-
-
-        <h2
-          style="
-            margin-top:20px
-          ">
-
-          ${t('loading')}
-
-        </h2>
-
-
-        <div class="muted">
-
-          data/sample-book.json
-
-        </div>
-
-      </div>
-
-    `);
-
-  }
-
-
-  const book =
-    getCurrentBook();
-
-
-  const chapter =
-    currentChapter();
-
-
-  if (!chapter) {
-
-    return layout(`
-
-      <div class="top">
-
-        <button
-          type="button"
-          class="back"
-          onclick="
-            go('library')
-          ">
-
-          ‹
-
-        </button>
-
-
-        <div style="flex:1">
-
-          <strong>
-
-            ${escapeHtml(
-              book?.title ||
-              ''
-            )}
-
-          </strong>
-
-
-          <div class="muted">
-
-            ${escapeHtml(
-              book?.author ||
-              ''
-            )}
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="muted">
-
-        ${t('loading')}
-
-      </div>
-
-    `);
-
-  }
-
-
-  const progress =
-    book.chapters.length
-      ? Math.round(
-          (
-            (
-              state.chapter +
-              1
-            ) /
-            book.chapters.length
-          ) *
-          100
-        )
-      : 0;
 
 
   return layout(`
@@ -2579,297 +1796,48 @@ function reader() {
         <strong>
 
           ${escapeHtml(
-            book.title
+            book.short
           )}
 
         </strong>
 
-
-        <div class="muted">
-
-          ${escapeHtml(
-            book.author
-          )}
-
-        </div>
-
       </div>
 
-
-      <button
-        type="button"
-        class="chip ${
-          state.script
-            ? 'on'
-            : ''
-        }"
-        onclick="
-          state.script =
-            !state.script;
-
-          save();
-
-          render();
-        ">
-
-        ${
-          state.script
-            ? 'A अ'
-            : 'A'
-        }
-
-      </button>
-
     </div>
-
-
-    <div
-      class="muted"
-      style="
-        display:flex;
-        justify-content:space-between;
-        margin-bottom:18px
-      ">
-
-      <span>
-
-        ${t('chapter')}
-
-        ${state.chapter + 1}
-
-        /
-
-        ${book.chapters.length}
-
-      </span>
-
-
-      <span>
-
-        ${progress}%
-
-      </span>
-
-    </div>
-
-
-    <div
-      class="progress"
-      style="
-        margin-bottom:28px
-      ">
-
-      <i
-        style="
-          width:${progress}%
-        ">
-      </i>
-
-    </div>
-
-
-    <h2>
-
-      ${escapeHtml(
-        chapter.title
-      )}
-
-    </h2>
 
 
     <div class="section">
 
-      ${
-        (
-          chapter.verses ||
-          []
-        )
-          .map(
-            verse => `
+      <div class="eyebrow">
 
-              <div
-                class="verse"
-                onclick="
-                  toggleBookmark(
-                    '${escapeAttribute(
-                      verse.ref
-                    )}'
-                  )
-                ">
+        ${t('reader')}
+
+      </div>
 
 
-                <div
-                  style="
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center
-                  ">
+      <h2>
 
-                  <div class="ref">
+        ${escapeHtml(
+          book.short
+        )}
 
-                    ${escapeHtml(
-                      verse.ref
-                    )}
-
-                  </div>
+      </h2>
 
 
-                  <div
-                    class="muted"
-                    style="
-                      font-size:11px
-                    ">
-
-                    ${
-                      isBookmarked(
-                        verse.ref
-                      )
-                        ? '★'
-                        : '☆'
-                    }
-
-                  </div>
-
-                </div>
-
-
-                ${
-                  state.script
-                    ? `
-
-                      <div class="deva">
-
-                        ${escapeHtml(
-                          verse.sanskrit ||
-                          ''
-                        )}
-
-                      </div>
-
-
-                      <div class="translit">
-
-                        ${escapeHtml(
-                          verse.transliteration ||
-                          ''
-                        )}
-
-                      </div>
-
-                    `
-                    : ''
-                }
-
-
-                <div class="english">
-
-                  ${
-                    state.lang ===
-                    'sl'
-
-                      ? escapeHtml(
-                          verse.slovenian ||
-                          verse.english ||
-                          ''
-                        )
-
-                      : escapeHtml(
-                          verse.english ||
-                          ''
-                        )
-                  }
-
-                </div>
-
-
-                ${
-                  verse.note
-                    ? `
-
-                      <div class="note">
-
-                        ${escapeHtml(
-                          verse.note
-                        )}
-
-                      </div>
-
-                    `
-                    : ''
-                }
-
-              </div>
-
-            `
+      <button
+        type="button"
+        class="primary"
+        onclick="
+          openPdf(
+            '${escapeAttribute(
+              book.pdf
+            )}'
           )
-          .join('')
-      }
-
-    </div>
-
-
-    <div
-      style="
-        display:flex;
-        gap:10px;
-        margin-top:30px;
-        max-width:950px
-      ">
-
-      <button
-        type="button"
-        class="chip"
-        style="
-          flex:1;
-          padding:12px
-        "
-        onclick="
-          previousChapter()
         ">
 
-        ‹
-
-        ${t('previous')}
+        ${t('openPdf')}
 
       </button>
-
-
-      <button
-        type="button"
-        class="chip on"
-        style="
-          flex:1;
-          padding:12px
-        "
-        onclick="
-          nextChapter()
-        ">
-
-        ${t('next')}
-
-        ›
-
-      </button>
-
-    </div>
-
-
-    <div
-      class="muted"
-      style="
-        text-align:center;
-        margin-top:20px
-      ">
-
-      ${t('bookmark')}:
-
-      ${
-        state.bookmarks.filter(
-          item =>
-            item.bookId ===
-            state.loadedBookId
-        ).length
-      }
 
     </div>
 
@@ -2887,7 +1855,7 @@ const PDFJS_VERSION =
 
 
 const SEARCH_DB_NAME =
-  'raganuga-search-db';
+  'universal-ai-library-search-db';
 
 
 const SEARCH_DB_VERSION =
@@ -2906,12 +1874,17 @@ let searchFocusFrame =
   null;
 
 
+/* =========================================================
+   NORMALIZE SEARCH TEXT
+   ========================================================= */
+
 function normalizeSearchText(
   value
 ) {
 
   return String(
-    value || ''
+    value ||
+    ''
   )
     .normalize(
       'NFD'
@@ -2925,28 +1898,19 @@ function normalizeSearchText(
 }
 
 
+/* =========================================================
+   SEARCH SNIPPET
+   ========================================================= */
+
 function makeSearchSnippet(
   result
 ) {
 
-  const source =
-    state.lang === 'sl'
-      ? (
-          result.slovenian ||
-          result.english ||
-          result.sanskrit ||
-          ''
-        )
-      : (
-          result.english ||
-          result.sanskrit ||
-          ''
-        );
-
-
   const text =
     String(
-      source
+      result.text ||
+      result.english ||
+      ''
     )
       .replace(
         /\s+/g,
@@ -2956,7 +1920,8 @@ function makeSearchSnippet(
 
 
   if (
-    text.length <= 320
+    text.length <=
+    320
   ) {
 
     return text;
@@ -2976,7 +1941,7 @@ function makeSearchSnippet(
     );
 
 
-  const pos =
+  const position =
     query
       ? normalized.indexOf(
           query
@@ -2984,12 +1949,15 @@ function makeSearchSnippet(
       : -1;
 
 
-  if (pos >= 0) {
+  if (
+    position >=
+    0
+  ) {
 
     const start =
       Math.max(
         0,
-        pos - 120
+        position - 120
       );
 
 
@@ -3037,80 +2005,33 @@ function makeSearchSnippet(
 
 function getPdfEntries() {
 
-  const entries = [];
+  return BOOKS
+    .filter(
+      book =>
+        book &&
+        book.pdf
+    )
+    .map(
+      book => ({
 
+        bookId:
+          book.id,
 
-  BOOKS.forEach(
-    book => {
+        bookTitle:
+          book.short,
 
-      if (book.pdf) {
+        author:
+          book.author ||
+          '',
 
-        entries.push({
+        chapterTitle:
+          'PDF',
 
-          bookId:
-            book.id,
+        pdf:
+          book.pdf
 
-          bookTitle:
-            book.short,
-
-          author:
-            book.author,
-
-          chapterTitle:
-            'PDF',
-
-          pdf:
-            book.pdf
-
-        });
-
-
-        return;
-
-      }
-
-
-      if (
-        Array.isArray(
-          book.pdfs
-        )
-      ) {
-
-        book.pdfs.forEach(
-          part => {
-
-            entries.push({
-
-              bookId:
-                book.id,
-
-              bookTitle:
-                book.short,
-
-              author:
-                book.author,
-
-              chapterTitle:
-                part.title,
-
-              pdf:
-                part.file,
-
-              partId:
-                part.id
-
-            });
-
-          }
-        );
-
-      }
-
-    }
-  );
-
-
-  return entries;
+      })
+    );
 
 }
 
@@ -3121,7 +2042,9 @@ function getPdfEntries() {
 
 async function getPdfJs() {
 
-  if (!pdfjsPromise) {
+  if (
+    !pdfjsPromise
+  ) {
 
     pdfjsPromise =
       import(
@@ -3174,7 +2097,7 @@ function openSearchDatabase() {
 
         reject(
           new Error(
-            'IndexedDB ni podprt v tem brskalniku.'
+            'IndexedDB is not supported.'
           )
         );
 
@@ -3266,6 +2189,10 @@ function openSearchDatabase() {
 }
 
 
+/* =========================================================
+   CLEAR SEARCH DATABASE
+   ========================================================= */
+
 function clearSearchDatabase() {
 
   return openSearchDatabase()
@@ -3326,6 +2253,10 @@ function clearSearchDatabase() {
 
 }
 
+
+/* =========================================================
+   LOAD CACHE
+   ========================================================= */
 
 function loadCachedSearchIndex() {
 
@@ -3395,6 +2326,10 @@ function loadCachedSearchIndex() {
 }
 
 
+/* =========================================================
+   SAVE SEARCH ROWS
+   ========================================================= */
+
 function saveSearchRows(
   rows
 ) {
@@ -3448,7 +2383,6 @@ function saveSearchRows(
 
                 db.close();
 
-
                 reject(
                   transaction.error
                 );
@@ -3480,7 +2414,8 @@ function makeSearchRow(
 
   const cleanText =
     String(
-      text || ''
+      text ||
+      ''
     )
       .replace(
         /\s+/g,
@@ -3504,9 +2439,6 @@ function makeSearchRow(
 
     author,
 
-    chapterIndex:
-      0,
-
     chapterTitle:
       chapterTitle +
       ' · page ' +
@@ -3520,16 +2452,10 @@ function makeSearchRow(
 
     pdf,
 
-    sanskrit:
-      cleanText,
-
-    transliteration:
+    text:
       cleanText,
 
     english:
-      cleanText,
-
-    slovenian:
       cleanText,
 
     normalized:
@@ -3561,23 +2487,20 @@ async function buildPdfSearchIndex() {
     getPdfEntries();
 
 
-  const rows = [];
-
-
-  let totalPages =
-    0;
+  const rows =
+    [];
 
 
   for (
-    let bookNumber = 0;
-    bookNumber <
+    let entryIndex = 0;
+    entryIndex <
       entries.length;
-    bookNumber++
+    entryIndex++
   ) {
 
     const entry =
       entries[
-        bookNumber
+        entryIndex
       ];
 
 
@@ -3595,10 +2518,6 @@ async function buildPdfSearchIndex() {
 
     const pdf =
       await loadingTask.promise;
-
-
-    totalPages +=
-      pdf.numPages;
 
 
     for (
@@ -3651,24 +2570,15 @@ async function buildPdfSearchIndex() {
 
 
       if (
-        pageNumber === 1 ||
-        pageNumber % 25 === 0 ||
-        pageNumber ===
-          pdf.numPages
+        state.screen ===
+        'search'
       ) {
 
         state.searchIndex =
           rows.slice();
 
 
-        if (
-          state.screen ===
-          'search'
-        ) {
-
-          render();
-
-        }
+        render();
 
       }
 
@@ -3679,17 +2589,13 @@ async function buildPdfSearchIndex() {
 
       await pdf.destroy();
 
-    } catch (e) {}
+    } catch (error) {}
 
   }
 
 
   return {
-
-    rows,
-
-    totalPages
-
+    rows
   };
 
 }
@@ -3702,7 +2608,6 @@ async function buildPdfSearchIndex() {
 async function buildSearchIndex() {
 
   if (
-    state.searchReady ||
     state.searchLoading
   ) {
 
@@ -3713,6 +2618,10 @@ async function buildSearchIndex() {
 
   state.searchLoading =
     true;
+
+
+  state.searchReady =
+    false;
 
 
   if (
@@ -3727,201 +2636,21 @@ async function buildSearchIndex() {
 
   try {
 
-    let sampleResults =
-      [];
+    const expectedEntries =
+      getPdfEntries();
 
 
-    try {
+    if (
+      !expectedEntries.length
+    ) {
 
-      const response =
-        await fetch(
-          'data/sample-book.json',
-          {
-            cache:
-              'no-store'
-          }
-        );
+      state.searchIndex =
+        [];
 
+      state.searchReady =
+        true;
 
-      if (!response.ok) {
-
-        throw new Error(
-          'HTTP ' +
-          response.status
-        );
-
-      }
-
-
-      const book =
-        await response.json();
-
-
-      (
-        book.chapters ||
-        []
-      )
-        .forEach(
-          (
-            chapter,
-            chapterIndex
-          ) => {
-
-            (
-              chapter.verses ||
-              []
-            )
-              .forEach(
-                verse => {
-
-                  sampleResults.push({
-
-                    id:
-                      'sample|' +
-                      chapterIndex +
-                      '|' +
-                      verse.ref,
-
-                    bookId:
-                      book.id,
-
-                    bookTitle:
-                      book.title,
-
-                    author:
-                      book.author,
-
-                    chapterIndex,
-
-                    chapterTitle:
-                      chapter.title,
-
-                    ref:
-                      verse.ref,
-
-                    sanskrit:
-                      verse.sanskrit ||
-                      '',
-
-                    transliteration:
-                      verse.transliteration ||
-                      '',
-
-                    english:
-                      verse.english ||
-                      '',
-
-                    slovenian:
-                      verse.slovenian ||
-                      '',
-
-                    normalized:
-                      normalizeSearchText(
-                        [
-                          book.title,
-                          book.author,
-                          chapter.title,
-                          verse.ref,
-                          verse.sanskrit,
-                          verse.transliteration,
-                          verse.english,
-                          verse.slovenian
-                        ].join(' ')
-                      )
-
-                  });
-
-                }
-              );
-
-          }
-        );
-
-    } catch (error) {
-
-      const book =
-        FALLBACK_BOOK;
-
-
-      (
-        book.chapters ||
-        []
-      )
-        .forEach(
-          (
-            chapter,
-            chapterIndex
-          ) => {
-
-            (
-              chapter.verses ||
-              []
-            )
-              .forEach(
-                verse => {
-
-                  sampleResults.push({
-
-                    id:
-                      'sample|' +
-                      chapterIndex +
-                      '|' +
-                      verse.ref,
-
-                    bookId:
-                      book.id,
-
-                    bookTitle:
-                      book.title,
-
-                    author:
-                      book.author,
-
-                    chapterIndex,
-
-                    chapterTitle:
-                      chapter.title,
-
-                    ref:
-                      verse.ref,
-
-                    sanskrit:
-                      verse.sanskrit ||
-                      '',
-
-                    transliteration:
-                      verse.transliteration ||
-                      '',
-
-                    english:
-                      verse.english ||
-                      '',
-
-                    slovenian:
-                      verse.slovenian ||
-                      '',
-
-                    normalized:
-                      normalizeSearchText(
-                        [
-                          book.title,
-                          book.author,
-                          chapter.title,
-                          verse.ref,
-                          verse.sanskrit,
-                          verse.transliteration,
-                          verse.english,
-                          verse.slovenian
-                        ].join(' ')
-                      )
-
-                  });
-
-                }
-              );
-
-          }
-        );
+      return;
 
     }
 
@@ -3938,15 +2667,22 @@ async function buildSearchIndex() {
     } catch (error) {
 
       console.warn(
-        'Could not load cached search index:',
+        'Could not load cached index:',
         error
       );
 
     }
 
 
-    const expectedPdfCount =
-      getPdfEntries().length;
+    const expectedIds =
+      new Set(
+        expectedEntries.map(
+          entry =>
+            entry.bookId +
+            '|' +
+            entry.pdf
+        )
+      );
 
 
     const cachedPdfRows =
@@ -3957,7 +2693,7 @@ async function buildSearchIndex() {
       );
 
 
-    const cachedPdfIds =
+    const cachedIds =
       new Set(
         cachedPdfRows.map(
           row =>
@@ -3968,26 +2704,16 @@ async function buildSearchIndex() {
       );
 
 
-    const expectedPdfIds =
-      new Set(
-        getPdfEntries().map(
-          entry =>
-            entry.bookId +
-            '|' +
-            entry.pdf
-        )
-      );
-
-
     const cacheComplete =
-      expectedPdfCount > 0 &&
-      cachedPdfIds.size ===
-        expectedPdfIds.size &&
+      expectedIds.size >
+        0 &&
+      expectedIds.size ===
+        cachedIds.size &&
       [
-        ...expectedPdfIds
+        ...expectedIds
       ].every(
         id =>
-          cachedPdfIds.has(
+          cachedIds.has(
             id
           )
       );
@@ -3997,14 +2723,16 @@ async function buildSearchIndex() {
       [];
 
 
-    if (cacheComplete) {
+    if (
+      cacheComplete
+    ) {
 
       pdfRows =
         cachedPdfRows;
 
 
       console.log(
-        'Rāgānugā Search: saved index found.',
+        'Universal AI Library: cached search index used.',
         pdfRows.length,
         'pages.'
       );
@@ -4018,7 +2746,7 @@ async function buildSearchIndex() {
       } catch (error) {
 
         console.warn(
-          'Could not clear old search index:',
+          'Could not clear old search index.',
           error
         );
 
@@ -4039,17 +2767,10 @@ async function buildSearchIndex() {
           pdfRows
         );
 
-
-        console.log(
-          'Rāgānugā Search: PDF index saved.',
-          pdfRows.length,
-          'pages.'
-        );
-
       } catch (error) {
 
         console.warn(
-          'Could not save PDF search index:',
+          'Could not save search index.',
           error
         );
 
@@ -4059,9 +2780,7 @@ async function buildSearchIndex() {
 
 
     state.searchIndex =
-      sampleResults.concat(
-        pdfRows
-      );
+      pdfRows;
 
 
     state.searchReady =
@@ -4071,7 +2790,7 @@ async function buildSearchIndex() {
   } catch (error) {
 
     console.error(
-      'Search index loading error:',
+      'Search index error:',
       error
     );
 
@@ -4085,9 +2804,9 @@ async function buildSearchIndex() {
 
 
     toast(
-      state.lang === 'sl'
-        ? 'Iskanja ni bilo mogoče pripraviti.'
-        : 'Could not prepare the library search.'
+      t(
+        'searching'
+      )
     );
 
   } finally {
@@ -4111,7 +2830,7 @@ async function buildSearchIndex() {
 
 
 /* =========================================================
-   SEARCH INPUT
+   SEARCH QUERY
    ========================================================= */
 
 function setSearchQuery(
@@ -4127,16 +2846,12 @@ function setSearchQuery(
 
   if (
     searchFocusFrame !==
-    null
+      null
   ) {
 
     cancelAnimationFrame(
       searchFocusFrame
     );
-
-
-    searchFocusFrame =
-      null;
 
   }
 
@@ -4147,16 +2862,6 @@ function setSearchQuery(
 
         searchFocusFrame =
           null;
-
-
-        if (
-          state.screen !==
-          'search'
-        ) {
-
-          return;
-
-        }
 
 
         const input =
@@ -4187,6 +2892,10 @@ function setSearchQuery(
 }
 
 
+/* =========================================================
+   SEARCH FILTER
+   ========================================================= */
+
 function setSearchFilter(
   value
 ) {
@@ -4201,6 +2910,10 @@ function setSearchFilter(
 }
 
 
+/* =========================================================
+   VISIBLE SEARCH RESULTS
+   ========================================================= */
+
 function getVisibleSearchResults() {
 
   const query =
@@ -4214,21 +2927,8 @@ function getVisibleSearchResults() {
 
 
   if (
-    state.filter ===
-    'Slovenian'
+    query
   ) {
-
-    results =
-      results.filter(
-        item =>
-          item.bookId ===
-          'sample-book'
-      );
-
-  }
-
-
-  if (query) {
 
     results =
       results.filter(
@@ -4242,10 +2942,8 @@ function getVisibleSearchResults() {
                 item.author,
                 item.chapterTitle,
                 item.ref,
-                item.sanskrit,
-                item.transliteration,
-                item.english,
-                item.slovenian
+                item.text,
+                item.english
               ].join(' ')
             );
 
@@ -4327,29 +3025,6 @@ function search() {
 
       </div>
 
-
-      ${
-        state.searchIndex.length
-          ? `
-
-            <div
-              class="muted"
-              style="
-                margin-top:10px
-              ">
-
-              ${state.searchIndex.length}
-
-              ${t(
-                'pagesIndexed'
-              )}
-
-            </div>
-
-          `
-          : ''
-      }
-
     `);
 
   }
@@ -4393,61 +3068,6 @@ function search() {
       ${t(
         'searchHint'
       )}
-
-    </div>
-
-
-    <div class="chips">
-
-      ${[
-        [
-          'All books',
-          t('allBooks')
-        ],
-        [
-          'English',
-          'English'
-        ],
-        [
-          'Slovenian',
-          'Slovenščina'
-        ],
-        [
-          'Sanskrit',
-          'Sanskrit'
-        ]
-      ]
-        .map(
-          (
-            [
-              value,
-              label
-            ]
-          ) => `
-
-            <button
-              type="button"
-              class="chip ${
-                state.filter ===
-                value
-                  ? 'on'
-                  : ''
-              }"
-              onclick="
-                setSearchFilter(
-                  '${escapeAttribute(
-                    value
-                  )}'
-                )
-              ">
-
-              ${label}
-
-            </button>
-
-          `
-        )
-        .join('')}
 
     </div>
 
@@ -4508,31 +3128,9 @@ function search() {
                   <div
                     class="muted">
 
-                    ${
-                      result.pdf
-
-                        ? escapeHtml(
-                            result.chapterTitle
-                          )
-
-                        : (
-                            escapeHtml(
-                              t(
-                                'chapterResult'
-                              )
-                            ) +
-                            ' ' +
-                            (
-                              Number(
-                                result.chapterIndex
-                              ) + 1
-                            ) +
-                            ' · ' +
-                            escapeHtml(
-                              result.chapterTitle
-                            )
-                          )
-                    }
+                    ${escapeHtml(
+                      result.chapterTitle
+                    )}
 
                   </div>
 
@@ -4553,56 +3151,29 @@ function search() {
                   </div>
 
 
-                  ${
-                    result.pdf
+                  <button
+                    type="button"
+                    class="chip on"
+                    style="
+                      margin-top:10px
+                    "
+                    onclick="
+                      event.stopPropagation();
 
-                      ? `
+                      openPdf(
+                        '${escapeAttribute(
+                          result.pdf
+                        )}',
+                        ${Number(
+                          result.page
+                        )}
+                      );
 
-                        <button
-                          type="button"
-                          class="chip on"
-                          style="
-                            margin-top:10px
-                          "
-                          onclick="
-                            event.stopPropagation();
+                    ">
 
-                            openPdf(
-                              '${escapeAttribute(
-                                result.pdf
-                              )}',
-                              ${Number(
-                                result.page
-                              )}
-                            );
+                    ${t('openPage')}
 
-                          ">
-
-                          ${t(
-                            'openPage'
-                          )}
-
-                        </button>
-
-                      `
-
-                      : `
-
-                        <div
-                          class="muted"
-                          style="
-                            margin-top:7px;
-                            font-size:11px
-                          ">
-
-                          ${escapeHtml(
-                            result.sanskrit
-                          )}
-
-                        </div>
-
-                      `
-                  }
+                  </button>
 
                 </div>
 
@@ -4623,41 +3194,6 @@ function search() {
         `
     }
 
-
-    ${
-      results.length > 100
-        ? `
-
-          <div
-            class="muted"
-            style="
-              margin-top:16px;
-              padding-bottom:30px
-            ">
-
-            ${
-              state.lang ===
-              'sl'
-
-                ? `
-                  Prikazanih je prvih 100
-                  zadetkov od
-                  ${results.length}.
-                `
-
-                : `
-                  Showing the first 100
-                  results of
-                  ${results.length}.
-                `
-            }
-
-          </div>
-
-        `
-        : ''
-    }
-
   `);
 
 }
@@ -4671,12 +3207,12 @@ function openSearchResult(
   index
 ) {
 
-  const visibleResults =
+  const results =
     getVisibleSearchResults();
 
 
   const result =
-    visibleResults[
+    results[
       index
     ];
 
@@ -4686,169 +3222,16 @@ function openSearchResult(
   }
 
 
-  if (result.pdf) {
-
-    state.screen =
-      'search';
-
-
-    save();
-
-
-    openPdf(
-      result.pdf,
-      result.page
-    );
-
-
-    return;
-
-  }
-
-
-  state.book =
-    0;
-
-
-  state.loadedBookId =
-    'sample-book';
-
-
-  state.chapter =
-    Number(
-      result.chapterIndex
-    ) || 0;
-
-
-  state.screen =
-    'reader';
-
-
-  save();
-  render();
-
-
-  if (
-    !state.loadedBook ||
-    state.loadedBook.id !==
-      result.bookId
-  ) {
-
-    loadSampleBook()
-      .then(
-        () => {
-
-          state.chapter =
-            Number(
-              result.chapterIndex
-            ) || 0;
-
-
-          save();
-          render();
-
-
-          scrollToVerse(
-            result.ref
-          );
-
-        }
-      );
-
-  } else {
-
-    setTimeout(
-      () => {
-
-        scrollToVerse(
-          result.ref
-        );
-
-      },
-      100
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   SCROLL TO VERSE
-   ========================================================= */
-
-function scrollToVerse(
-  ref
-) {
-
-  setTimeout(
-    () => {
-
-      const verses =
-        document.querySelectorAll(
-          '.verse'
-        );
-
-
-      for (
-        const verse of
-        verses
-      ) {
-
-        const reference =
-          verse.querySelector(
-            '.ref'
-          );
-
-
-        if (
-          reference &&
-          reference.textContent
-            .trim() ===
-            String(ref)
-        ) {
-
-          verse.scrollIntoView({
-
-            behavior:
-              'smooth',
-
-            block:
-              'center'
-
-          });
-
-
-          verse.style.outline =
-            '2px solid currentColor';
-
-
-          setTimeout(
-            () => {
-
-              verse.style.outline =
-                '';
-
-            },
-            1800
-          );
-
-
-          break;
-
-        }
-
-      }
-
-    },
-    150
+  openPdf(
+    result.pdf,
+    result.page
   );
 
 }
 
 
 /* =========================================================
-   AI SOURCE SELECTION
+   SOURCE SELECTION
    ========================================================= */
 
 function toggleLectureSource(
@@ -4884,13 +3267,16 @@ function toggleLectureSource(
 }
 
 
+/* =========================================================
+   FORM INPUTS
+   ========================================================= */
+
 function setLectureTopic(
   value
 ) {
 
   state.lectureTopic =
     value;
-
 
   save();
 
@@ -4902,8 +3288,9 @@ function setLectureLength(
 ) {
 
   state.lectureLength =
-    String(value);
-
+    String(
+      value
+    );
 
   save();
   render();
@@ -4918,7 +3305,6 @@ function setPoemPrompt(
   state.poemPrompt =
     value;
 
-
   save();
 
 }
@@ -4931,21 +3317,20 @@ function setAskPrompt(
   state.askPrompt =
     value;
 
-
   save();
 
 }
 
 
 /* =========================================================
-   AI PASSAGE SELECTION
+   AI PASSAGE FINDER
    ========================================================= */
 
 function findAiPassages(
   instructionText
 ) {
 
-  const normalizedInstruction =
+  const instruction =
     normalizeSearchText(
       String(
         instructionText ||
@@ -4963,7 +3348,9 @@ function findAiPassages(
               index
             ]?.id
         )
-        .filter(Boolean)
+        .filter(
+          Boolean
+        )
     );
 
 
@@ -4979,8 +3366,10 @@ function findAiPassages(
 
 
   const words =
-    normalizedInstruction
-      .split(/\s+/)
+    instruction
+      .split(
+        /\s+/
+      )
       .map(
         word =>
           normalizeSearchText(
@@ -4992,7 +3381,8 @@ function findAiPassages(
       )
       .filter(
         word =>
-          word.length >= 3
+          word.length >=
+          3
       );
 
 
@@ -5008,10 +3398,8 @@ function findAiPassages(
               row.author,
               row.chapterTitle,
               row.ref,
-              row.sanskrit,
-              row.transliteration,
-              row.english,
-              row.slovenian
+              row.text,
+              row.english
             ].join(' ')
           );
 
@@ -5029,7 +3417,8 @@ function findAiPassages(
               )
             ) {
 
-              score += 1;
+              score +=
+                1;
 
             }
 
@@ -5038,13 +3427,14 @@ function findAiPassages(
 
 
         if (
-          normalizedInstruction &&
+          instruction &&
           text.includes(
-            normalizedInstruction
+            instruction
           )
         ) {
 
-          score += 5;
+          score +=
+            5;
 
         }
 
@@ -5052,13 +3442,6 @@ function findAiPassages(
         const titleText =
           normalizeSearchText(
             row.bookTitle ||
-            ''
-          );
-
-
-        const authorText =
-          normalizeSearchText(
-            row.author ||
             ''
           );
 
@@ -5072,18 +3455,8 @@ function findAiPassages(
               )
             ) {
 
-              score += 2;
-
-            }
-
-
-            if (
-              authorText.includes(
-                word
-              )
-            ) {
-
-              score += 1;
+              score +=
+                2;
 
             }
 
@@ -5145,6 +3518,11 @@ function findAiPassages(
       );
 
 
+  /*
+   * Pošljemo največ 24 najbolj
+   * relevantnih strani.
+   */
+
   return candidates
     .slice(
       0,
@@ -5155,7 +3533,7 @@ function findAiPassages(
 
         const rawText =
           String(
-            row.sanskrit ||
+            row.text ||
             row.english ||
             ''
           )
@@ -5170,11 +3548,13 @@ function findAiPassages(
           rawText.length >
           2600
 
-            ? rawText.slice(
-                0,
-                2600
-              ) +
-              '…'
+            ? (
+                rawText.slice(
+                  0,
+                  2600
+                ) +
+                '…'
+              )
 
             : rawText;
 
@@ -5218,7 +3598,9 @@ function saveGeneratedWork(
       Date.now() +
       '-' +
       Math.random()
-        .toString(36)
+        .toString(
+          36
+        )
         .slice(
           2,
           8
@@ -5232,14 +3614,18 @@ function saveGeneratedWork(
       (
         work.type ===
         'poem'
+
           ? t(
               'aiPoem'
             )
+
           : work.type ===
             'ask'
+
             ? t(
                 'askBooks'
               )
+
             : t(
                 'aiLecture'
               )
@@ -5275,20 +3661,23 @@ function saveGeneratedWork(
 
 
   state.works = [
+
     item,
+
     ...state.works.filter(
       existing =>
         existing &&
         existing.id !==
         item.id
     )
+
   ];
 
 
   state.works =
     state.works.slice(
       0,
-      20
+      30
     );
 
 
@@ -5301,7 +3690,7 @@ function saveGeneratedWork(
 
 
 /* =========================================================
-   WORK DATE
+   FORMAT WORK DATE
    ========================================================= */
 
 function formatWorkDate(
@@ -5318,7 +3707,8 @@ function formatWorkDate(
     return new Date(
       value
     ).toLocaleString(
-      state.lang === 'sl'
+      state.lang ===
+      'sl'
         ? 'sl-SI'
         : 'en-US',
       {
@@ -5340,7 +3730,7 @@ function formatWorkDate(
 
 
 /* =========================================================
-   DOWNLOAD GENERATED WORK
+   DOWNLOAD SAVED WORK
    ========================================================= */
 
 function downloadSavedWork(
@@ -5383,8 +3773,8 @@ function downloadSavedWork(
         ? (
             state.lang ===
             'sl'
-              ? 'Vprašaj knjige'
-              : 'Ask the Books'
+              ? 'Vprašanje knjig'
+              : 'Book question'
           )
 
         : (
@@ -5419,71 +3809,13 @@ function downloadSavedWork(
       .trim();
 
 
-  function decodeHtmlEntities(
-    value
-  ) {
-
-    const textarea =
-      document.createElement(
-        'textarea'
-      );
-
-
-    textarea.innerHTML =
-      String(
-        value ?? ''
-      );
-
-
-    return textarea.value;
-
-  }
-
-
-  function escapeHtml(
-    value
-  ) {
-
-    return String(
-      value ?? ''
-    )
-      .replace(
-        /&/g,
-        '&amp;'
-      )
-      .replace(
-        /</g,
-        '&lt;'
-      )
-      .replace(
-        />/g,
-        '&gt;'
-      )
-      .replace(
-        /"/g,
-        '&quot;'
-      )
-      .replace(
-        /'/g,
-        '&#039;'
-      );
-
-  }
-
-
   function markdownToHtml(
     text
   ) {
 
-    const decoded =
-      decodeHtmlEntities(
-        text
-      );
-
-
     let html =
       escapeHtml(
-        decoded
+        text
       );
 
 
@@ -5517,13 +3849,6 @@ function downloadSavedWork(
 
     html =
       html.replace(
-        /(?<!\*)\*(?!\s)(.*?)(?<!\s)\*(?!\*)/g,
-        '<em>$1</em>'
-      );
-
-
-    html =
-      html.replace(
         /^---$/gm,
         '<hr>'
       );
@@ -5539,8 +3864,7 @@ function downloadSavedWork(
             block.trim()
         )
         .filter(
-          block =>
-            block
+          Boolean
         );
 
 
@@ -5569,11 +3893,10 @@ function downloadSavedWork(
 
           return (
             '<p>' +
-            block
-              .replace(
-                /\n/g,
-                '<br>'
-              ) +
+            block.replace(
+              /\n/g,
+              '<br>'
+            ) +
             '</p>'
           );
 
@@ -5608,42 +3931,36 @@ function downloadSavedWork(
           .map(
             passage => {
 
-              const book =
-                passage.bookTitle ||
-                '';
-
-
-              const author =
-                passage.author ||
-                '';
-
-
-              const page =
-                passage.page
-                  ? (
-                      state.lang ===
-                      'sl'
-                        ? ` · stran ${passage.page}`
-                        : ` · page ${passage.page}`
-                    )
-                  : '';
-
-
               return `
                 <li>
+
                   ${escapeHtml(
-                    book
+                    passage.bookTitle ||
+                    ''
                   )}
 
                   ${
-                    author
+                    passage.author
                       ? ` — ${escapeHtml(
-                          author
+                          passage.author
                         )}`
                       : ''
                   }
 
-                  ${page}
+                  ${
+                    passage.page
+                      ? (
+                          state.lang ===
+                          'sl'
+                            ? ` · stran ${escapeHtml(
+                                passage.page
+                              )}`
+                            : ` · page ${escapeHtml(
+                                passage.page
+                              )}`
+                        )
+                      : ''
+                  }
 
                 </li>
               `;
@@ -5656,46 +3973,31 @@ function downloadSavedWork(
       : '';
 
 
-  const languageCode =
-    state.lang === 'sl'
-      ? 'sl'
-      : 'en';
-
-
-  const promptLabel =
-    state.lang === 'sl'
-      ? 'Navodilo'
-      : 'Prompt';
-
-
-  const sourcesLabel =
-    state.lang === 'sl'
+  const sourceLabel =
+    state.lang ===
+    'sl'
       ? 'Viri'
       : 'Sources';
 
 
+  const questionLabel =
+    state.lang ===
+    'sl'
+      ? 'Vprašanje'
+      : 'Question';
+
+
   const createdLabel =
-    state.lang === 'sl'
+    state.lang ===
+    'sl'
       ? 'Ustvarjeno'
       : 'Created';
-
-
-  const durationLabel =
-    state.lang === 'sl'
-      ? 'Trajanje'
-      : 'Duration';
-
-
-  const noSources =
-    state.lang === 'sl'
-      ? 'Viri niso navedeni.'
-      : 'No sources listed.';
 
 
   const htmlDocument = `
 <!doctype html>
 
-<html lang="${languageCode}">
+<html lang="${state.lang === 'sl' ? 'sl' : 'en'}">
 
 <head>
 
@@ -5706,15 +4008,10 @@ function downloadSavedWork(
   content="width=device-width,initial-scale=1"
 >
 
-<meta
-  name="format-detection"
-  content="telephone=no"
->
-
 <title>
-  ${escapeHtml(
-    title
-  )}
+${escapeHtml(
+  title
+)}
 </title>
 
 
@@ -5732,291 +4029,158 @@ function downloadSavedWork(
 
 
 <link
-  href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap"
   rel="stylesheet"
 >
 
 
 <style>
 
-  * {
-    box-sizing: border-box;
-  }
+* {
+  box-sizing:
+    border-box;
+}
 
+body {
+
+  margin:
+    0;
+
+  padding:
+    40px 20px;
+
+  background:
+    #f5f2eb;
+
+  color:
+    #2d2924;
+
+  font-family:
+    "Noto Sans",
+    sans-serif;
+
+  line-height:
+    1.78;
+
+  font-size:
+    16px;
+
+}
+
+.page {
+
+  width:
+    min(
+      920px,
+      100%
+    );
+
+  margin:
+    0 auto;
+
+  background:
+    #ffffff;
+
+  padding:
+    52px 58px;
+
+  border-radius:
+    18px;
+
+  box-shadow:
+    0 12px 40px
+    rgba(
+      0,
+      0,
+      0,
+      0.08
+    );
+
+}
+
+h1,
+h2,
+h3 {
+
+  font-family:
+    "Noto Serif",
+    serif;
+
+}
+
+h1 {
+
+  font-size:
+    2.1rem;
+
+}
+
+h2 {
+
+  margin-top:
+    36px;
+
+}
+
+h3 {
+
+  margin-top:
+    28px;
+
+}
+
+p {
+
+  margin:
+    0 0 18px;
+
+}
+
+.sources {
+
+  margin-top:
+    44px;
+
+  padding-top:
+    26px;
+
+  border-top:
+    1px solid
+    #ddd6ca;
+
+}
+
+@media (
+  max-width:700px
+) {
 
   body {
 
-    margin: 0;
-
     padding:
-      40px 20px;
-
-    background:
-      #f5f2eb;
-
-    color:
-      #2d2924;
-
-    font-family:
-      "Noto Sans",
-      "Noto Sans Devanagari",
-      "Noto Sans Bengali",
-      sans-serif;
-
-    line-height:
-      1.78;
-
-    font-size:
-      16px;
-
-  }
-
-
-  .page {
-
-    width:
-      min(
-        920px,
-        100%
-      );
-
-    margin:
-      0 auto;
+      0;
 
     background:
       #ffffff;
 
+  }
+
+  .page {
+
+    width:
+      100%;
+
     padding:
-      52px 58px;
+      28px 20px;
 
     border-radius:
-      18px;
+      0;
 
     box-shadow:
-      0 12px 40px
-      rgba(
-        0,
-        0,
-        0,
-        0.08
-      );
+      none;
 
   }
 
-
-  h1 {
-
-    margin:
-      0 0 12px;
-
-    font-family:
-      "Noto Serif",
-      "Noto Serif Devanagari",
-      serif;
-
-    font-size:
-      2.15rem;
-
-    line-height:
-      1.3;
-
-    font-weight:
-      700;
-
-  }
-
-
-  h2 {
-
-    margin:
-      36px 0 14px;
-
-    font-family:
-      "Noto Serif",
-      "Noto Serif Devanagari",
-      serif;
-
-    font-size:
-      1.55rem;
-
-    line-height:
-      1.4;
-
-  }
-
-
-  h3 {
-
-    margin:
-      28px 0 12px;
-
-    font-family:
-      "Noto Serif",
-      "Noto Serif Devanagari",
-      serif;
-
-    font-size:
-      1.2rem;
-
-    line-height:
-      1.45;
-
-  }
-
-
-  p {
-
-    margin:
-      0 0 18px;
-
-  }
-
-
-  strong {
-
-    font-weight:
-      700;
-
-  }
-
-
-  em {
-
-    font-style:
-      italic;
-
-  }
-
-
-  hr {
-
-    margin:
-      32px 0;
-
-    border:
-      0;
-
-    border-top:
-      1px solid
-      #ddd6ca;
-
-  }
-
-
-  .meta {
-
-    margin:
-      8px 0;
-
-  }
-
-
-  .meta strong {
-
-    margin-right:
-      6px;
-
-  }
-
-
-  .sources {
-
-    margin-top:
-      44px;
-
-    padding-top:
-      26px;
-
-    border-top:
-      1px solid
-      #ddd6ca;
-
-  }
-
-
-  .sources h2 {
-
-    margin-top:
-      0;
-
-  }
-
-
-  .sources ul {
-
-    margin:
-      0;
-
-    padding-left:
-      26px;
-
-  }
-
-
-  .sources li {
-
-    margin-bottom:
-      8px;
-
-  }
-
-
-  @media (
-    max-width: 700px
-  ) {
-
-    body {
-
-      padding:
-        0;
-
-      background:
-        #ffffff;
-
-    }
-
-
-    .page {
-
-      width:
-        100%;
-
-      padding:
-        28px 20px;
-
-      border-radius:
-        0;
-
-      box-shadow:
-        none;
-
-    }
-
-
-    h1 {
-
-      font-size:
-        1.65rem;
-
-    }
-
-
-    h2 {
-
-      font-size:
-        1.35rem;
-
-    }
-
-
-    h3 {
-
-      font-size:
-        1.1rem;
-
-    }
-
-  }
+}
 
 </style>
 
@@ -6027,15 +4191,16 @@ function downloadSavedWork(
 
 <main class="page">
 
-
   <h1>
+
     ${escapeHtml(
       title
     )}
+
   </h1>
 
 
-  <div class="meta">
+  <p>
 
     <strong>
 
@@ -6045,62 +4210,20 @@ function downloadSavedWork(
 
     </strong>
 
-  </div>
-
-
-  ${
-    work.length
-      ? `
-
-        <div class="meta">
-
-          <strong>
-
-            ${escapeHtml(
-              durationLabel
-            )}:
-
-          </strong>
-
-
-          ${escapeHtml(
-            work.length
-          )}
-
-
-          ${
-            state.lang ===
-            'sl'
-              ? ' minut'
-              : ' minutes'
-          }
-
-        </div>
-
-      `
-      : ''
-  }
+  </p>
 
 
   ${
     prompt
       ? `
 
-        <div
-          class="meta"
-          style="
-            margin-top:20px
-          ">
+        <h3>
 
-          <strong>
+          ${escapeHtml(
+            questionLabel
+          )}
 
-            ${escapeHtml(
-              promptLabel
-            )}:
-
-          </strong>
-
-        </div>
+        </h3>
 
 
         <div>
@@ -6129,7 +4252,7 @@ function downloadSavedWork(
     <h2>
 
       ${escapeHtml(
-        sourcesLabel
+        sourceLabel
       )}
 
     </h2>
@@ -6146,13 +4269,16 @@ function downloadSavedWork(
           </ul>
 
         `
+
         : `
 
           <p>
 
-            ${escapeHtml(
-              noSources
-            )}
+            ${state.lang ===
+            'sl'
+              ? 'Viri niso navedeni.'
+              : 'No sources listed.'
+            }
 
           </p>
 
@@ -6162,11 +4288,7 @@ function downloadSavedWork(
   </section>
 
 
-  <div
-    class="meta"
-    style="
-      margin-top:30px
-    ">
+  <p>
 
     <strong>
 
@@ -6183,8 +4305,7 @@ function downloadSavedWork(
       )
     )}
 
-  </div>
-
+  </p>
 
 </main>
 
@@ -6227,7 +4348,7 @@ function downloadSavedWork(
         100
       )
       .trim() ||
-    'raganuga-work';
+    'ai-book-library-work';
 
 
   const link =
@@ -6269,7 +4390,8 @@ function downloadSavedWork(
 
 
   toast(
-    state.lang === 'sl'
+    state.lang ===
+    'sl'
       ? 'Delo je preneseno.'
       : 'Work downloaded.'
   );
@@ -6326,10 +4448,6 @@ function openSavedWork(
     state.poemError =
       '';
 
-
-    state.poemGenerating =
-      false;
-
   }
 
   else if (
@@ -6362,10 +4480,6 @@ function openSavedWork(
 
     state.askError =
       '';
-
-
-    state.askGenerating =
-      false;
 
   }
 
@@ -6404,11 +4518,17 @@ function openSavedWork(
     state.lectureError =
       '';
 
-
-    state.lectureGenerating =
-      false;
-
   }
+
+
+  state.lectureGenerating =
+    false;
+
+  state.poemGenerating =
+    false;
+
+  state.askGenerating =
+    false;
 
 
   state.screen =
@@ -6441,7 +4561,8 @@ function removeSavedWork(
 ) {
 
   if (
-    index < 0 ||
+    index <
+      0 ||
     index >=
       state.works.length
   ) {
@@ -6460,18 +4581,6 @@ function removeSavedWork(
   save();
   render();
 
-
-  setTimeout(
-    () => {
-
-      toast(
-        t('removed')
-      );
-
-    },
-    50
-  );
-
 }
 
 
@@ -6486,9 +4595,9 @@ async function generate() {
   ) {
 
     toast(
-      state.lang === 'sl'
-        ? 'Najprej izberi vsaj eno knjigo.'
-        : 'Please select at least one book.'
+      t(
+        'chooseAtLeastOne'
+      )
     );
 
 
@@ -6502,9 +4611,9 @@ async function generate() {
   ) {
 
     toast(
-      state.lang === 'sl'
-        ? 'Najprej vpiši temo predavanja.'
-        : 'Please enter a lecture topic.'
+      t(
+        'missingTopic'
+      )
     );
 
 
@@ -6558,12 +4667,14 @@ async function generate() {
       );
 
 
-    if (!selected.length) {
+    if (
+      !selected.length
+    ) {
 
       throw new Error(
-        state.lang === 'sl'
-          ? 'V izbranih knjigah za to temo ni bilo mogoče najti ustreznih strani.'
-          : 'No relevant pages were found in the selected books.'
+        t(
+          'noRelevantPages'
+        )
       );
 
     }
@@ -6579,8 +4690,9 @@ async function generate() {
 
     const response =
       await fetch(
-        'https://raganuga-lecture.eyeslotus.workers.dev',
+        AI_WORKER_URL,
         {
+
           method:
             'POST',
 
@@ -6604,7 +4716,8 @@ async function generate() {
                 state.lectureTopic.trim(),
 
               language:
-                state.lang === 'sl'
+                state.lang ===
+                'sl'
                   ? 'Slovenščina'
                   : 'English',
 
@@ -6620,22 +4733,8 @@ async function generate() {
       );
 
 
-    let data =
-      null;
-
-
-    try {
-
-      data =
-        await response.json();
-
-    } catch (error) {
-
-      throw new Error(
-        'The AI service returned an invalid response.'
-      );
-
-    }
+    const data =
+      await response.json();
 
 
     if (
@@ -6646,7 +4745,9 @@ async function generate() {
 
       throw new Error(
         data?.error ||
-        `AI service returned HTTP ${response.status}.`
+        t(
+          'lectureError'
+        )
       );
 
     }
@@ -6667,9 +4768,9 @@ async function generate() {
     ) {
 
       throw new Error(
-        state.lang === 'sl'
-          ? 'AI ni vrnil vsebine predavanja.'
-          : 'The AI returned an empty lecture.'
+        t(
+          'lectureError'
+        )
       );
 
     }
@@ -6687,7 +4788,8 @@ async function generate() {
         state.lectureTopic.trim(),
 
       language:
-        state.lang === 'sl'
+        state.lang ===
+        'sl'
           ? 'Slovenščina'
           : 'English',
 
@@ -6701,10 +4803,6 @@ async function generate() {
         state.lecturePassages
 
     });
-
-
-    state.lectureError =
-      '';
 
 
     state.lectureGenerating =
@@ -6744,11 +4842,8 @@ async function generate() {
 
     state.lectureError =
       error?.message ||
-      (
-        state.lang ===
-        'sl'
-          ? 'Predavanja ni bilo mogoče ustvariti.'
-          : 'Could not generate the lecture.'
+      t(
+        'lectureError'
       );
 
 
@@ -6775,9 +4870,9 @@ async function generatePoem() {
   ) {
 
     toast(
-      state.lang === 'sl'
-        ? 'Najprej izberi vsaj eno knjigo.'
-        : 'Please select at least one book.'
+      t(
+        'chooseAtLeastOne'
+      )
     );
 
 
@@ -6791,9 +4886,9 @@ async function generatePoem() {
   ) {
 
     toast(
-      state.lang === 'sl'
-        ? 'Najprej napiši navodilo za pesem.'
-        : 'Please enter a poem prompt.'
+      t(
+        'missingPoem'
+      )
     );
 
 
@@ -6847,12 +4942,14 @@ async function generatePoem() {
       );
 
 
-    if (!selected.length) {
+    if (
+      !selected.length
+    ) {
 
       throw new Error(
-        state.lang === 'sl'
-          ? 'V izbranih knjigah za to pesem ni bilo mogoče najti ustreznih strani.'
-          : 'No relevant pages were found in the selected books.'
+        t(
+          'noRelevantPages'
+        )
       );
 
     }
@@ -6868,8 +4965,9 @@ async function generatePoem() {
 
     const response =
       await fetch(
-        'https://raganuga-lecture.eyeslotus.workers.dev',
+        AI_WORKER_URL,
         {
+
           method:
             'POST',
 
@@ -6890,7 +4988,8 @@ async function generatePoem() {
                 state.poemPrompt.trim(),
 
               language:
-                state.lang === 'sl'
+                state.lang ===
+                'sl'
                   ? 'Slovenščina'
                   : 'English',
 
@@ -6903,22 +5002,8 @@ async function generatePoem() {
       );
 
 
-    let data =
-      null;
-
-
-    try {
-
-      data =
-        await response.json();
-
-    } catch (error) {
-
-      throw new Error(
-        'The AI service returned an invalid response.'
-      );
-
-    }
+    const data =
+      await response.json();
 
 
     if (
@@ -6929,7 +5014,9 @@ async function generatePoem() {
 
       throw new Error(
         data?.error ||
-        `AI service returned HTTP ${response.status}.`
+        t(
+          'poemError'
+        )
       );
 
     }
@@ -6950,9 +5037,9 @@ async function generatePoem() {
     ) {
 
       throw new Error(
-        state.lang === 'sl'
-          ? 'AI ni vrnil pesmi.'
-          : 'The AI returned an empty poem.'
+        t(
+          'poemError'
+        )
       );
 
     }
@@ -6970,7 +5057,8 @@ async function generatePoem() {
         state.poemPrompt.trim(),
 
       language:
-        state.lang === 'sl'
+        state.lang ===
+        'sl'
           ? 'Slovenščina'
           : 'English',
 
@@ -6981,10 +5069,6 @@ async function generatePoem() {
         state.poemPassages
 
     });
-
-
-    state.poemError =
-      '';
 
 
     state.poemGenerating =
@@ -7024,11 +5108,8 @@ async function generatePoem() {
 
     state.poemError =
       error?.message ||
-      (
-        state.lang ===
-        'sl'
-          ? 'Pesmi ni bilo mogoče ustvariti.'
-          : 'Could not generate the poem.'
+      t(
+        'poemError'
       );
 
 
@@ -7055,9 +5136,9 @@ async function generateAsk() {
   ) {
 
     toast(
-      state.lang === 'sl'
-        ? 'Najprej izberi vsaj eno knjigo.'
-        : 'Please select at least one book.'
+      t(
+        'chooseAtLeastOne'
+      )
     );
 
 
@@ -7071,9 +5152,9 @@ async function generateAsk() {
   ) {
 
     toast(
-      state.lang === 'sl'
-        ? 'Najprej napiši vprašanje.'
-        : 'Please enter a question.'
+      t(
+        'missingQuestion'
+      )
     );
 
 
@@ -7127,12 +5208,14 @@ async function generateAsk() {
       );
 
 
-    if (!selected.length) {
+    if (
+      !selected.length
+    ) {
 
       throw new Error(
-        state.lang === 'sl'
-          ? 'V izbranih PDF knjigah ni bilo mogoče najti ustreznih odlomkov za to vprašanje.'
-          : 'No relevant passages were found in the selected PDF books.'
+        t(
+          'noRelevantPages'
+        )
       );
 
     }
@@ -7148,8 +5231,9 @@ async function generateAsk() {
 
     const response =
       await fetch(
-        'https://raganuga-lecture.eyeslotus.workers.dev',
+        AI_WORKER_URL,
         {
+
           method:
             'POST',
 
@@ -7170,7 +5254,8 @@ async function generateAsk() {
                 state.askPrompt.trim(),
 
               language:
-                state.lang === 'sl'
+                state.lang ===
+                'sl'
                   ? 'Slovenščina'
                   : 'English',
 
@@ -7183,22 +5268,8 @@ async function generateAsk() {
       );
 
 
-    let data =
-      null;
-
-
-    try {
-
-      data =
-        await response.json();
-
-    } catch (error) {
-
-      throw new Error(
-        'The AI service returned an invalid response.'
-      );
-
-    }
+    const data =
+      await response.json();
 
 
     if (
@@ -7209,7 +5280,9 @@ async function generateAsk() {
 
       throw new Error(
         data?.error ||
-        `AI service returned HTTP ${response.status}.`
+        t(
+          'answerError'
+        )
       );
 
     }
@@ -7230,9 +5303,9 @@ async function generateAsk() {
     ) {
 
       throw new Error(
-        state.lang === 'sl'
-          ? 'AI ni vrnil odgovora.'
-          : 'The AI returned an empty answer.'
+        t(
+          'answerError'
+        )
       );
 
     }
@@ -7250,7 +5323,8 @@ async function generateAsk() {
         state.askPrompt.trim(),
 
       language:
-        state.lang === 'sl'
+        state.lang ===
+        'sl'
           ? 'Slovenščina'
           : 'English',
 
@@ -7261,10 +5335,6 @@ async function generateAsk() {
         state.askPassages
 
     });
-
-
-    state.askError =
-      '';
 
 
     state.askGenerating =
@@ -7304,11 +5374,8 @@ async function generateAsk() {
 
     state.askError =
       error?.message ||
-      (
-        state.lang ===
-        'sl'
-          ? 'Odgovora ni bilo mogoče ustvariti.'
-          : 'Could not create the answer.'
+      t(
+        'answerError'
       );
 
 
@@ -7351,8 +5418,11 @@ function create() {
           ">
 
           ${
-            state.lang === 'sl'
+            state.lang ===
+            'sl'
+
               ? 'AI pripravlja predavanje…'
+
               : 'AI is preparing your lecture…'
           }
 
@@ -7391,8 +5461,11 @@ function create() {
           ">
 
           ${
-            state.lang === 'sl'
+            state.lang ===
+            'sl'
+
               ? 'AI pripravlja pesem…'
+
               : 'AI is preparing your poem…'
           }
 
@@ -7430,7 +5503,9 @@ function create() {
             margin-top:20px
           ">
 
-          ${t('answerPreparing')}
+          ${t(
+            'answerPreparing'
+          )}
 
         </h2>
 
@@ -7466,556 +5541,549 @@ function create() {
     </h1>
 
 
-    <div class="section card">
+    ${
+      BOOKS.length
+        ? `
 
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          gap:12px;
-          margin-bottom:14px
-        ">
+          <div class="section card">
 
-        <h3 style="margin:0">
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+                margin-bottom:14px
+              ">
 
-          ${t('chooseBooks')}
-
-        </h3>
-
-
-        <span class="muted">
-
-          ${selectedCount}
-
-          ${t('selectedBooks')}
-
-        </span>
-
-      </div>
-
-
-      <div
-        style="
-          display:grid;
-          gap:10px
-        ">
-
-        ${BOOKS.map(
-          (
-            book,
-            index
-          ) => {
-
-            const selected =
-              state.sources.includes(
-                index
-              );
-
-
-            return `
-
-              <button
-                type="button"
-                class="select ${
-                  selected
-                    ? 'on'
-                    : ''
-                }"
+              <h3
                 style="
-                  text-align:left;
-                  padding:15px;
-                  display:flex;
-                  align-items:center;
-                  justify-content:space-between;
-                  gap:12px
-                "
-                onclick="
-                  toggleLectureSource(
-                    ${index}
-                  )
+                  margin:0
                 ">
 
-                <span
-                  style="
-                    display:block;
-                    min-width:0
-                  ">
+                ${t(
+                  'chooseBooks'
+                )}
 
-                  <strong>
-
-                    ${escapeHtml(
-                      book.short
-                    )}
-
-                  </strong>
-
-                </span>
+              </h3>
 
 
-                <span
-                  style="
-                    font-size:20px;
-                    flex:0 0 auto
-                  ">
+              <span class="muted">
 
-                  ${
-                    selected
-                      ? '✓'
-                      : '○'
-                  }
+                ${selectedCount}
 
-                </span>
+                ${t(
+                  'selectedBooks'
+                )}
 
-              </button>
+              </span>
 
-            `;
-
-          }
-        ).join('')}
-
-      </div>
-
-    </div>
+            </div>
 
 
-    <div
-      class="card"
-      style="
-        margin-top:24px
-      ">
+            <div
+              style="
+                display:grid;
+                gap:10px
+              ">
 
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          gap:12px
-        ">
+              ${BOOKS.map(
+                (
+                  book,
+                  index
+                ) => {
 
-        <h2
-          style="
-            margin:0
-          ">
-
-          ${t('aiLecture')}
-
-        </h2>
-
-      </div>
+                  const selected =
+                    state.sources.includes(
+                      index
+                    );
 
 
-      <p
-        class="muted"
-        style="
-          margin-top:8px;
-          margin-bottom:18px
-        ">
+                  return `
 
-        ${
-          state.lang === 'sl'
-            ? 'Ustvari predavanje iz izbranih knjig.'
-            : 'Create a lecture from the selected books.'
-        }
+                    <button
+                      type="button"
+                      class="select ${
+                        selected
+                          ? 'on'
+                          : ''
+                      }"
+                      style="
+                        text-align:left;
+                        padding:15px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:space-between;
+                        gap:12px
+                      "
+                      onclick="
+                        toggleLectureSource(
+                          ${index}
+                        )
+                      ">
 
-      </p>
+                      <span
+                        style="
+                          display:block;
+                          min-width:0
+                        ">
 
+                        <strong>
 
-      <h3>
+                          ${escapeHtml(
+                            book.short
+                          )}
 
-        ${t('lectureTopic')}
+                        </strong>
 
-      </h3>
-
-
-      <textarea
-        class="textarea"
-        style="
-          margin-top:10px;
-          min-height:130px
-        "
-        oninput="
-          setLectureTopic(
-            this.value
-          )
-        "
-        placeholder="${t(
-          'lectureTopicPlaceholder'
-        )}">${escapeHtml(
-          state.lectureTopic
-        )}</textarea>
-
-    </div>
+                      </span>
 
 
-    <div class="card">
+                      <span
+                        style="
+                          font-size:20px;
+                          flex:0 0 auto
+                        ">
 
-      <h3>
+                        ${
+                          selected
+                            ? '✓'
+                            : '○'
+                        }
 
-        ${t('lectureLength')}
+                      </span>
 
-      </h3>
+                    </button>
+
+                  `;
+
+                }
+              ).join('')}
+
+            </div>
+
+          </div>
+
+        `
+
+        : `
+
+          <div class="section card">
+
+            <div class="muted">
+
+              ${t(
+                'noBooks'
+              )}
+
+            </div>
+
+          </div>
+
+        `
+    }
 
 
-      <div
-        class="formgrid"
-        style="
-          margin-top:10px
-        ">
+    ${
+      BOOKS.length
+        ? `
 
-        ${[
-          [
-            '10',
-            t('minutes10')
-          ],
-          [
-            '20',
-            t('minutes20')
-          ],
-          [
-            '40',
-            t('minutes40')
-          ],
-          [
-            '60',
-            t('minutes60')
-          ],
-          [
-            '120',
-            t('minutes120')
-          ]
-        ]
-          .map(
-            (
-              [
-                value,
-                label
+          <div
+            class="card"
+            style="
+              margin-top:24px
+            ">
+
+            <h2
+              style="
+                margin:0
+              ">
+
+              ${t(
+                'aiLecture'
+              )}
+
+            </h2>
+
+
+            <p
+              class="muted"
+              style="
+                margin-top:8px;
+                margin-bottom:18px
+              ">
+
+              ${
+                state.lang ===
+                'sl'
+
+                  ? 'Ustvari predavanje iz izbranih knjig.'
+
+                  : 'Create a lecture from the selected books.'
+              }
+
+            </p>
+
+
+            <h3>
+
+              ${t(
+                'lectureTopic'
+              )}
+
+            </h3>
+
+
+            <textarea
+              class="textarea"
+              style="
+                margin-top:10px;
+                min-height:130px
+              "
+              oninput="
+                setLectureTopic(
+                  this.value
+                )
+              "
+              placeholder="${t(
+                'lectureTopicPlaceholder'
+              )}">${escapeHtml(
+                state.lectureTopic
+              )}</textarea>
+
+
+            <h3>
+
+              ${t(
+                'lectureLength'
+              )}
+
+            </h3>
+
+
+            <div
+              class="formgrid"
+              style="
+                margin-top:10px
+              ">
+
+              ${[
+                [
+                  '10',
+                  t('minutes10')
+                ],
+                [
+                  '20',
+                  t('minutes20')
+                ],
+                [
+                  '40',
+                  t('minutes40')
+                ],
+                [
+                  '60',
+                  t('minutes60')
+                ],
+                [
+                  '120',
+                  t('minutes120')
+                ]
               ]
-            ) => `
+                .map(
+                  (
+                    [
+                      value,
+                      label
+                    ]
+                  ) => `
+
+                    <button
+                      type="button"
+                      class="select ${
+                        String(
+                          state.lectureLength
+                        ) ===
+                        String(
+                          value
+                        )
+                          ? 'on'
+                          : ''
+                      }"
+                      onclick="
+                        setLectureLength(
+                          '${value}'
+                        )
+                      ">
+
+                      ${label}
+
+                    </button>
+
+                  `
+                )
+                .join('')}
+
+            </div>
+
+
+            <h3>
+
+              ${t(
+                'lectureLanguage'
+              )}
+
+            </h3>
+
+
+            <div
+              class="chips"
+              style="
+                margin-top:10px
+              ">
 
               <button
                 type="button"
-                class="select ${
-                  String(
-                    state.lectureLength
-                  ) ===
-                  String(
-                    value
-                  )
+                class="chip ${
+                  state.lang ===
+                  'sl'
                     ? 'on'
                     : ''
                 }"
                 onclick="
-                  setLectureLength(
-                    '${value}'
-                  )
+                  setLanguage('sl')
                 ">
 
-                ${label}
+                🇸🇮 Slovenščina
 
               </button>
 
-            `
-          )
-          .join('')}
 
-      </div>
+              <button
+                type="button"
+                class="chip ${
+                  state.lang ===
+                  'en'
+                    ? 'on'
+                    : ''
+                }"
+                onclick="
+                  setLanguage('en')
+                ">
 
-    </div>
+                🇬🇧 English
 
+              </button>
 
-    <div class="card">
+            </div>
 
-      <h3>
 
-        ${t('lectureLanguage')}
+            <button
+              type="button"
+              class="primary"
+              style="
+                margin-top:18px
+              "
+              onclick="
+                generate()
+              ">
 
-      </h3>
+              ✦
 
+              ${t(
+                'createLecture'
+              )}
 
-      <div
-        class="chips"
-        style="
-          margin-top:10px
-        ">
+            </button>
 
-        <button
-          type="button"
-          class="chip ${
-            state.lang ===
-            'sl'
-              ? 'on'
-              : ''
-          }"
-          onclick="
-            setLanguage(
-              'sl'
-            )
-          ">
+          </div>
 
-          🇸🇮 Slovenščina
 
-        </button>
+          <div
+            class="section card"
+            style="
+              margin-top:32px
+            ">
 
+            <h2
+              style="
+                margin:0
+              ">
 
-        <button
-          type="button"
-          class="chip ${
-            state.lang ===
-            'en'
-              ? 'on'
-              : ''
-          }"
-          onclick="
-            setLanguage(
-              'en'
-            )
-          ">
+              ${t(
+                'aiPoem'
+              )}
 
-          🇬🇧 English
+            </h2>
 
-        </button>
 
-      </div>
+            <p
+              class="muted"
+              style="
+                margin-top:8px;
+                margin-bottom:18px
+              ">
 
-    </div>
+              ${
+                state.lang ===
+                'sl'
 
+                  ? 'Ustvari izvirno pesem na podlagi vsebine izbranih knjig.'
 
-    <button
-      type="button"
-      class="primary"
-      onclick="
-        generate()
-      ">
+                  : 'Create an original poem based on the selected books.'
+              }
 
-      ✦
+            </p>
 
-      ${t(
-        'createLecture'
-      )}
 
-    </button>
+            <h3>
 
+              ${t(
+                'poemPrompt'
+              )}
 
-    <div
-      class="muted"
-      style="
-        text-align:center;
-        margin-top:12px
-      ">
+            </h3>
 
-      ${selectedCount}
 
-      ${t(
-        'selectedBooks'
-      )}
+            <textarea
+              class="textarea"
+              style="
+                margin-top:10px;
+                min-height:190px
+              "
+              oninput="
+                setPoemPrompt(
+                  this.value
+                )
+              "
+              placeholder="${t(
+                'poemPromptPlaceholder'
+              )}">${escapeHtml(
+                state.poemPrompt
+              )}</textarea>
 
-    </div>
 
+            <button
+              type="button"
+              class="primary"
+              style="
+                margin-top:16px
+              "
+              onclick="
+                generatePoem()
+              ">
 
-    <div
-      class="section card"
-      style="
-        margin-top:32px
-      ">
+              ✦
 
-      <h2
-        style="
-          margin:0
-        ">
+              ${t(
+                'createPoem'
+              )}
 
-        ${t('aiPoem')}
+            </button>
 
-      </h2>
+          </div>
 
 
-      <p
-        class="muted"
-        style="
-          margin-top:8px;
-          margin-bottom:18px
-        ">
+          <div
+            class="section card"
+            style="
+              margin-top:32px
+            ">
 
-        ${
-          state.lang === 'sl'
-            ? 'Pesem opiši popolnoma po svoje. V prompt lahko napišeš število verzov, jezik, slog, temo, razpoloženje in vse druge podrobnosti.'
-            : 'Describe the poem exactly as you want it. You can specify the number of verses, language, style, theme, mood and anything else.'
-        }
+            <h2
+              style="
+                margin:0
+              ">
 
-      </p>
+              ${t(
+                'askBooks'
+              )}
 
+            </h2>
 
-      <h3>
 
-        ${t('poemPrompt')}
+            <p
+              class="muted"
+              style="
+                margin-top:8px;
+                margin-bottom:18px
+              ">
 
-      </h3>
+              ${t(
+                'askDescription'
+              )}
 
+            </p>
 
-      <textarea
-        class="textarea"
-        style="
-          margin-top:10px;
-          min-height:190px
-        "
-        oninput="
-          setPoemPrompt(
-            this.value
-          )
-        "
-        placeholder="${t(
-          'poemPromptPlaceholder'
-        )}">${escapeHtml(
-          state.poemPrompt
-        )}</textarea>
 
+            <div
+              class="muted"
+              style="
+                margin-bottom:18px;
+                padding:10px 12px;
+                border:1px solid rgba(0,0,0,0.08);
+                border-radius:10px;
+                line-height:1.5
+              ">
 
-      <button
-        type="button"
-        class="primary"
-        style="
-          margin-top:16px
-        "
-        onclick="
-          generatePoem()
-        ">
+              🔒
 
-        ✦
+              ${t(
+                'sourceMaterialOnly'
+              )}
 
-        ${t(
-          'createPoem'
-        )}
+            </div>
 
-      </button>
 
+            <h3>
 
-      <div
-        class="muted"
-        style="
-          text-align:center;
-          margin-top:12px
-        ">
+              ${t(
+                'askQuestion'
+              )}
 
-        ${selectedCount}
+            </h3>
 
-        ${t(
-          'selectedBooks'
-        )}
 
-      </div>
+            <textarea
+              class="textarea"
+              style="
+                margin-top:10px;
+                min-height:220px
+              "
+              oninput="
+                setAskPrompt(
+                  this.value
+                )
+              "
+              placeholder="${t(
+                'askQuestionPlaceholder'
+              )}">${escapeHtml(
+                state.askPrompt
+              )}</textarea>
 
-    </div>
 
+            <button
+              type="button"
+              class="primary"
+              style="
+                margin-top:16px
+              "
+              onclick="
+                generateAsk()
+              ">
 
-    <div
-      class="section card"
-      style="
-        margin-top:32px
-      ">
+              ✦
 
-      <h2
-        style="
-          margin:0
-        ">
+              ${t(
+                'askBooksButton'
+              )}
 
-        ${t('askBooks')}
+            </button>
 
-      </h2>
+          </div>
 
-
-      <p
-        class="muted"
-        style="
-          margin-top:8px;
-          margin-bottom:18px
-        ">
-
-        ${t(
-          'askDescription'
-        )}
-
-      </p>
-
-
-      <div
-        class="muted"
-        style="
-          margin-bottom:18px;
-          padding:10px 12px;
-          border:1px solid rgba(0,0,0,0.08);
-          border-radius:10px;
-          line-height:1.5
-        ">
-
-        🔒
-
-        ${t(
-          'sourceMaterialOnly'
-        )}
-
-      </div>
-
-
-      <h3>
-
-        ${t('askQuestion')}
-
-      </h3>
-
-
-      <textarea
-        class="textarea"
-        style="
-          margin-top:10px;
-          min-height:220px
-        "
-        oninput="
-          setAskPrompt(
-            this.value
-          )
-        "
-        placeholder="${t(
-          'askQuestionPlaceholder'
-        )}">${escapeHtml(
-          state.askPrompt
-        )}</textarea>
-
-
-      <button
-        type="button"
-        class="primary"
-        style="
-          margin-top:16px
-        "
-        onclick="
-          generateAsk()
-        ">
-
-        ✦
-
-        ${t(
-          'askBooksButton'
-        )}
-
-      </button>
-
-
-      <div
-        class="muted"
-        style="
-          text-align:center;
-          margin-top:12px
-        ">
-
-        ${selectedCount}
-
-        ${t(
-          'selectedBooks'
-        )}
-
-      </div>
-
-    </div>
+        `
+        : ''
+    }
 
   `);
 
@@ -8032,7 +6100,8 @@ function formatLecture(
 
   const lines =
     String(
-      text || ''
+      text ||
+      ''
     )
       .split(
         /\r?\n/
@@ -8049,9 +6118,13 @@ function formatLecture(
 
         if (!clean) {
 
-          return (
-            '<div style="height:10px"></div>'
-          );
+          return `
+            <div
+              style="
+                height:10px
+              ">
+            </div>
+          `;
 
         }
 
@@ -8168,7 +6241,8 @@ function formatPoem(
 
   const lines =
     String(
-      text || ''
+      text ||
+      ''
     )
       .split(
         /\r?\n/
@@ -8195,9 +6269,13 @@ function formatPoem(
 
               if (!clean) {
 
-                return (
-                  '<div style="height:10px"></div>'
-                );
+                return `
+                  <div
+                    style="
+                      height:10px
+                    ">
+                  </div>
+                `;
 
               }
 
@@ -8215,11 +6293,9 @@ function formatPoem(
               ) {
 
                 return `
-
                   <h4
                     style="
-                      margin-top:24px;
-                      margin-bottom:8px
+                      margin-top:24px
                     ">
 
                     ${escaped.slice(
@@ -8227,7 +6303,6 @@ function formatPoem(
                     )}
 
                   </h4>
-
                 `;
 
               }
@@ -8240,11 +6315,9 @@ function formatPoem(
               ) {
 
                 return `
-
                   <h3
                     style="
-                      margin-top:28px;
-                      margin-bottom:10px
+                      margin-top:28px
                     ">
 
                     ${escaped.slice(
@@ -8252,7 +6325,6 @@ function formatPoem(
                     )}
 
                   </h3>
-
                 `;
 
               }
@@ -8265,11 +6337,9 @@ function formatPoem(
               ) {
 
                 return `
-
                   <h2
                     style="
-                      margin-top:28px;
-                      margin-bottom:12px
+                      margin-top:28px
                     ">
 
                     ${escaped.slice(
@@ -8277,7 +6347,6 @@ function formatPoem(
                     )}
 
                   </h2>
-
                 `;
 
               }
@@ -8296,7 +6365,7 @@ function formatPoem(
                   style="
                     font-size:17px;
                     line-height:1.9;
-                    margin:0 0 6px;
+                    margin:0 0 6px
                   ">
 
                   ${formatted}
@@ -8340,8 +6409,11 @@ function result() {
           ">
 
           ${
-            state.lang === 'sl'
+            state.lang ===
+            'sl'
+
               ? 'AI pripravlja predavanje…'
+
               : 'AI is preparing your lecture…'
           }
 
@@ -8380,8 +6452,11 @@ function result() {
           ">
 
           ${
-            state.lang === 'sl'
+            state.lang ===
+            'sl'
+
               ? 'AI pripravlja pesem…'
+
               : 'AI is preparing your poem…'
           }
 
@@ -8419,7 +6494,9 @@ function result() {
             margin-top:20px
           ">
 
-          ${t('answerPreparing')}
+          ${t(
+            'answerPreparing'
+          )}
 
         </h2>
 
@@ -8468,7 +6545,9 @@ function result() {
 
             <strong>
 
-              ${t('aiPoem')}
+              ${t(
+                'aiPoem'
+              )}
 
             </strong>
 
@@ -8481,14 +6560,9 @@ function result() {
 
           <h3>
 
-            ${
-              state.lang ===
-              'sl'
-
-                ? 'Pesmi ni bilo mogoče ustvariti'
-
-                : 'Could not create the poem'
-            }
+            ${t(
+              'poemError'
+            )}
 
           </h3>
 
@@ -8512,6 +6586,7 @@ function result() {
           ">
 
           ✦
+
           ${t(
             'createPoem'
           )}
@@ -8543,7 +6618,9 @@ function result() {
 
           <strong>
 
-            ${t('aiPoem')}
+            ${t(
+              'aiPoem'
+            )}
 
           </strong>
 
@@ -8569,14 +6646,18 @@ function result() {
           margin-top:10px
         ">
 
-        ${t('generatedWork')}
+        ${t(
+          'generatedWork'
+        )}
 
       </div>
 
 
       <h1>
 
-        ${t('aiPoem')}
+        ${t(
+          'aiPoem'
+        )}
 
       </h1>
 
@@ -8598,13 +6679,10 @@ function result() {
 
         ${
           state.generatedPoem
-
             ? formatPoem(
                 state.generatedPoem
               )
-
             : `
-
               <div class="muted">
 
                 ${
@@ -8617,7 +6695,6 @@ function result() {
                 }
 
               </div>
-
             `
         }
 
@@ -8632,7 +6709,9 @@ function result() {
 
               <h3>
 
-                ${t('sources')}
+                ${t(
+                  'sources'
+                )}
 
               </h3>
 
@@ -8640,7 +6719,8 @@ function result() {
               <div
                 class="muted"
                 style="
-                  margin-top:10px
+                  margin-top:10px;
+                  line-height:1.7
                 ">
 
                 ${
@@ -8664,7 +6744,8 @@ function result() {
                         }${
                           passage.page
                             ? ` · ${
-                                state.lang === 'sl'
+                                state.lang ===
+                                'sl'
                                   ? 'stran'
                                   : 'page'
                               } ${
@@ -8698,7 +6779,9 @@ function result() {
 
         ←
 
-        ${t('create')}
+        ${t(
+          'create'
+        )}
 
       </button>
 
@@ -8736,7 +6819,9 @@ function result() {
 
             <strong>
 
-              ${t('askBooks')}
+              ${t(
+                'askBooks'
+              )}
 
             </strong>
 
@@ -8749,7 +6834,9 @@ function result() {
 
           <h3>
 
-            ${t('noAnswer')}
+            ${t(
+              'noAnswer'
+            )}
 
           </h3>
 
@@ -8805,7 +6892,9 @@ function result() {
 
           <strong>
 
-            ${t('askBooks')}
+            ${t(
+              'askBooks'
+            )}
 
           </strong>
 
@@ -8831,14 +6920,18 @@ function result() {
           margin-top:10px
         ">
 
-        ${t('generatedWork')}
+        ${t(
+          'generatedWork'
+        )}
 
       </div>
 
 
       <h1>
 
-        ${t('answer')}
+        ${t(
+          'answer'
+        )}
 
       </h1>
 
@@ -8890,7 +6983,9 @@ function result() {
 
               <h3>
 
-                ${t('sources')}
+                ${t(
+                  'sources'
+                )}
 
               </h3>
 
@@ -8923,7 +7018,8 @@ function result() {
                         }${
                           passage.page
                             ? ` · ${
-                                state.lang === 'sl'
+                                state.lang ===
+                                'sl'
                                   ? 'stran'
                                   : 'page'
                               } ${
@@ -8957,7 +7053,9 @@ function result() {
 
         ←
 
-        ${t('create')}
+        ${t(
+          'create'
+        )}
 
       </button>
 
@@ -8990,7 +7088,9 @@ function result() {
 
           <strong>
 
-            ${t('aiLecture')}
+            ${t(
+              'aiLecture'
+            )}
 
           </strong>
 
@@ -9003,14 +7103,9 @@ function result() {
 
         <h3>
 
-          ${
-            state.lang ===
-            'sl'
-
-              ? 'Predavanja ni bilo mogoče ustvariti'
-
-              : 'Could not create the lecture'
-          }
+          ${t(
+            'lectureError'
+          )}
 
         </h3>
 
@@ -9066,7 +7161,9 @@ function result() {
 
         <strong>
 
-          ${t('aiLecture')}
+          ${t(
+            'aiLecture'
+          )}
 
         </strong>
 
@@ -9098,7 +7195,9 @@ function result() {
         margin-top:10px
       ">
 
-      ${t('generatedWork')}
+      ${t(
+        'generatedWork'
+      )}
 
     </div>
 
@@ -9150,7 +7249,9 @@ function result() {
 
             <h3>
 
-              ${t('sources')}
+              ${t(
+                'sources'
+              )}
 
             </h3>
 
@@ -9158,7 +7259,8 @@ function result() {
             <div
               class="muted"
               style="
-                margin-top:10px
+                margin-top:10px;
+                line-height:1.7
               ">
 
               ${
@@ -9182,7 +7284,8 @@ function result() {
                       }${
                         passage.page
                           ? ` · ${
-                              state.lang === 'sl'
+                              state.lang ===
+                              'sl'
                                 ? 'stran'
                                 : 'page'
                             } ${
@@ -9217,7 +7320,7 @@ function result() {
       ←
 
       ${t(
-        'createLecture'
+        'create'
       )}
 
     </button>
@@ -9228,207 +7331,10 @@ function result() {
 
 
 /* =========================================================
-   SAVED / BOOKMARKS
-   ========================================================= */
-
-function openBookmark(
-  index
-) {
-
-  const bookmark =
-    state.bookmarks[
-      index
-    ];
-
-
-  if (!bookmark) {
-    return;
-  }
-
-
-  const bookIndex =
-    BOOKS.findIndex(
-      book =>
-        book.id ===
-        bookmark.bookId
-    );
-
-
-  if (
-    bookIndex < 0 ||
-    BOOKS[
-      bookIndex
-    ]?.sample
-  ) {
-
-    state.book =
-      0;
-
-
-    state.loadedBookId =
-      'sample-book';
-
-
-    state.chapter =
-      Number(
-        bookmark.chapter
-      ) || 0;
-
-
-    state.screen =
-      'reader';
-
-
-    save();
-    render();
-
-
-    loadSampleBook()
-      .then(
-        () => {
-
-          const book =
-            getCurrentBook();
-
-
-          if (
-            book?.chapters &&
-            book.chapters.length
-          ) {
-
-            state.chapter =
-              Math.max(
-                0,
-                Math.min(
-                  state.chapter,
-                  book.chapters.length -
-                    1
-                )
-              );
-
-          }
-
-
-          save();
-          render();
-
-
-          scrollToVerse(
-            bookmark.ref
-          );
-
-        }
-      );
-
-
-    return;
-
-  }
-
-
-  const book =
-    BOOKS[
-      bookIndex
-    ];
-
-
-  if (book.pdf) {
-
-    state.book =
-      bookIndex;
-
-
-    save();
-
-
-    openPdf(
-      book.pdf
-    );
-
-
-    return;
-
-  }
-
-
-  if (
-    Array.isArray(
-      book.pdfs
-    ) &&
-    book.pdfs.length
-  ) {
-
-    state.book =
-      bookIndex;
-
-
-    state.screen =
-      'reader';
-
-
-    save();
-    render();
-
-
-    return;
-
-  }
-
-}
-
-
-/* =========================================================
-   REMOVE BOOKMARK
-   ========================================================= */
-
-function removeBookmark(
-  index
-) {
-
-  if (
-    index < 0 ||
-    index >=
-      state.bookmarks.length
-  ) {
-
-    return;
-
-  }
-
-
-  state.bookmarks.splice(
-    index,
-    1
-  );
-
-
-  save();
-  render();
-
-
-  setTimeout(
-    () => {
-
-      toast(
-        t('removed')
-      );
-
-    },
-    50
-  );
-
-}
-
-
-/* =========================================================
    SAVED SCREEN
    ========================================================= */
 
 function saved() {
-
-  const bookmarks =
-    state.bookmarks;
-
 
   const works =
     state.works;
@@ -9438,7 +7344,9 @@ function saved() {
 
     <h2>
 
-      ${t('saved')}
+      ${t(
+        'saved'
+      )}
 
     </h2>
 
@@ -9455,7 +7363,9 @@ function saved() {
 
         <h3>
 
-          ${t('works')}
+          ${t(
+            'works'
+          )}
 
         </h3>
 
@@ -9521,13 +7431,13 @@ function saved() {
                   const shortPreview =
                     preview.length >
                     170
-
-                      ? preview.slice(
-                          0,
-                          170
-                        ) +
-                        '…'
-
+                      ? (
+                          preview.slice(
+                            0,
+                            170
+                          ) +
+                          '…'
+                        )
                       : preview;
 
 
@@ -9590,15 +7500,6 @@ function saved() {
                                 : t(
                                     'lectureWork'
                                   )
-                          }
-
-
-                          ${
-                            work.length
-                              ? ` · ${escapeHtml(
-                                  work.length
-                                )} min`
-                              : ''
                           }
 
                         </div>
@@ -9742,205 +7643,6 @@ function saved() {
 
     </div>
 
-
-    <div class="section">
-
-      <div class="row">
-
-        <div class="num">
-
-          ★
-
-        </div>
-
-
-        <div class="grow">
-
-          <div>
-
-            ${t(
-              'bookmark'
-            )}
-
-          </div>
-
-
-          <div class="muted">
-
-            ${bookmarks.length}
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      ${
-        bookmarks.length
-
-          ? bookmarks
-              .map(
-                (
-                  bookmark,
-                  index
-                ) => `
-
-                  <div
-                    class="row"
-                    style="
-                      cursor:pointer;
-                      align-items:flex-start
-                    "
-                    onclick="
-                      openBookmark(
-                        ${index}
-                      )
-                    ">
-
-                    <div class="num">
-
-                      ★
-
-                    </div>
-
-
-                    <div class="grow">
-
-                      <div>
-
-                        ${escapeHtml(
-                          bookmark.bookTitle ||
-                          'Rāgānugā Bhakti — Sample Book'
-                        )}
-
-                      </div>
-
-
-                      <div class="muted">
-
-                        ${escapeHtml(
-                          bookmark.chapterTitle ||
-                          (
-                            `${t(
-                              'chapter'
-                            )} ${
-                              Number(
-                                bookmark.chapter ||
-                                0
-                              ) + 1
-                            }`
-                          )
-                        )}
-
-                        ·
-
-                        ${escapeHtml(
-                          bookmark.ref ||
-                          ''
-                        )}
-
-                      </div>
-
-
-                      <div
-                        style="
-                          margin-top:7px;
-                          line-height:1.5
-                        ">
-
-                        ${
-                          state.lang ===
-                          'sl'
-
-                            ? escapeHtml(
-                                bookmark.slovenian ||
-                                bookmark.english ||
-                                ''
-                              )
-
-                            : escapeHtml(
-                                bookmark.english ||
-                                ''
-                              )
-                        }
-
-                      </div>
-
-
-                      <div
-                        style="
-                          display:flex;
-                          gap:8px;
-                          margin-top:10px
-                        ">
-
-                        <button
-                          type="button"
-                          class="chip on"
-                          onclick="
-                            event.stopPropagation();
-
-                            openBookmark(
-                              ${index}
-                            );
-
-                          ">
-
-                          ${t(
-                            'openBookmark'
-                          )}
-
-                        </button>
-
-
-                        <button
-                          type="button"
-                          class="chip"
-                          onclick="
-                            event.stopPropagation();
-
-                            removeBookmark(
-                              ${index}
-                            );
-
-                          ">
-
-                          ${t(
-                            'removeBookmark'
-                          )}
-
-                        </button>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                `
-              )
-              .join('')
-
-          : `
-
-            <div
-              class="muted"
-              style="
-                padding:18px 0
-              ">
-
-              ${t(
-                'noBookmarks'
-              )}
-
-            </div>
-
-          `
-      }
-
-    </div>
-
   `);
 
 }
@@ -10007,106 +7709,65 @@ function render() {
 window.setLanguage =
   setLanguage;
 
-
 window.go =
   go;
-
 
 window.toast =
   toast;
 
-
 window.openBook =
   openBook;
-
 
 window.openPdf =
   openPdf;
 
-
-window.previousChapter =
-  previousChapter;
-
-
-window.nextChapter =
-  nextChapter;
-
-
-window.toggleBookmark =
-  toggleBookmark;
-
-
-window.openBookmark =
-  openBookmark;
-
-
-window.removeBookmark =
-  removeBookmark;
-
-
 window.setSearchQuery =
   setSearchQuery;
-
 
 window.setSearchFilter =
   setSearchFilter;
 
-
 window.openSearchResult =
   openSearchResult;
-
 
 window.generate =
   generate;
 
-
 window.generatePoem =
   generatePoem;
-
 
 window.generateAsk =
   generateAsk;
 
-
 window.toggleLectureSource =
   toggleLectureSource;
-
 
 window.setLectureTopic =
   setLectureTopic;
 
-
 window.setLectureLength =
   setLectureLength;
-
 
 window.setPoemPrompt =
   setPoemPrompt;
 
-
 window.setAskPrompt =
   setAskPrompt;
-
 
 window.openSavedWork =
   openSavedWork;
 
-
 window.downloadSavedWork =
   downloadSavedWork;
-
 
 window.removeSavedWork =
   removeSavedWork;
 
-
 window.save =
   save;
 
-
 window.render =
   render;
-
 
 window.loadBooksFromGitHub =
   loadBooksFromGitHub;
