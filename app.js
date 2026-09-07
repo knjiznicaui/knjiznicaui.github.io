@@ -2,38 +2,18 @@
    UNIVERSAL AI BOOK LIBRARY
    ========================================================= */
 
-/*
- * =========================================================
- * PROJECT CONFIGURATION
- * =========================================================
- *
- * 1. GITHUB_OWNER
- *    GitHub account / organization name.
- *
- * 2. GITHUB_REPO
- *    Repository name.
- *
- * 3. AI_WORKER_URL
- *    URL of the Cloudflare Worker.
- *
- * Put PDF books into:
- *
- *    books/
- *
- * Every PDF inside that folder is automatically loaded.
- */
+/* =========================================================
+   PROJECT CONFIGURATION
+   ========================================================= */
 
 const GITHUB_OWNER =
   'knjiznicaui';
 
-
 const GITHUB_REPO =
   'knjiznicaui.github.io';
 
-
 const AI_WORKER_URL =
-  'https://ancient-lake-71ac.autointerviews.workers.dev/';
-
+  'https://ancient-lake-71ac.autointerviews.workers.dev';
 
 const GITHUB_BOOKS_API =
   'https://api.github.com/repos/' +
@@ -42,14 +22,12 @@ const GITHUB_BOOKS_API =
   GITHUB_REPO +
   '/contents/books';
 
-
 const GITHUB_RAW_BASE =
   'https://raw.githubusercontent.com/' +
   GITHUB_OWNER +
   '/' +
   GITHUB_REPO +
   '/main/books/';
-
 
 let BOOKS = [];
 
@@ -62,80 +40,37 @@ const I18N = {
 
   en: {
 
-    library:
-      'Library',
+    library: 'Library',
+    search: 'Search',
+    create: 'Create',
+    saved: 'My works',
 
-    search:
-      'Search',
+    books: 'Loaded books',
+    titles: 'titles',
 
-    create:
-      'Create',
-
-    saved:
-      'My works',
-
-    books:
-      'Loaded books',
-
-    titles:
-      'titles',
-
-    continue:
-      'Continue',
-
-    sources:
-      'Sources',
-
-    findSources:
-      'Find sources',
-
-    remove:
-      'Remove',
-
-    intent:
-      'Intent',
-
-    form:
-      'Form',
-
-    generateWork:
-      'Generate a work',
-
-    generate:
-      'Generate',
-
-    generatedWork:
-      'Generated work',
-
-    from:
-      'From',
-
-    saveWork:
-      'Save work',
-
-    allBooks:
-      'All books',
-
-    passages:
-      'passages',
+    sources: 'Sources',
+    passages: 'passages',
 
     acrossBooks:
       'Search loaded books…',
-
-    endSection:
-      'End of section',
-
-    english:
-      'English',
-
-    slovenian:
-      'Slovenščina',
 
     noResults:
       'No passages found',
 
     searching:
       'Preparing the library search…',
+
+    preparingSearch:
+      'Preparing search index…',
+
+    searchReady:
+      'Library search ready',
+
+    rebuildingSearch:
+      'Building the library index…',
+
+    searchHint:
+      'Search the text of the loaded PDF books.',
 
     reader:
       'Reader',
@@ -149,33 +84,20 @@ const I18N = {
     openPage:
       'Open page',
 
-    pagesIndexed:
-      'indexed pages',
-
-    preparingSearch:
-      'Preparing search index…',
-
-    searchReady:
-      'Library search ready',
-
-    rebuildingSearch:
-      'Building the library index…',
-
-    indexedPages:
-      'Indexed pages',
-
-    searchHint:
-      'Search the text of the loaded PDF books.',
-
-
-    aiLecture:
-      'AI Lecture',
+    createWork:
+      'Create',
 
     chooseBooks:
       'Choose books',
 
     selectedBooks:
       'selected',
+
+    aiLecture:
+      'AI Lecture',
+
+    lectureDescription:
+      'Create a structured lecture using the selected books.',
 
     lectureTopic:
       'Lecture topic',
@@ -207,31 +129,41 @@ const I18N = {
     createLecture:
       'Create lecture',
 
+    aiAssistant:
+      'AI Assistant',
 
-    aiPoem:
-      'AI Poem',
+    assistantDescription:
+      'Use AI normally. Relevant information from the selected books can be used when useful.',
 
-    poemPrompt:
-      'Poem prompt',
+    assistantPrompt:
+      'Message',
 
-    poemPromptPlaceholder:
-      'Describe exactly what you want: theme, number of verses, language, style, mood, terms, structure, etc.',
+    assistantPlaceholder:
+      'Ask anything, request an explanation, write something, plan something, summarize something, or discuss a topic…',
 
-    createPoem:
-      'Create poem',
+    assistantButton:
+      'Ask AI',
 
+    assistantPreparing:
+      'AI is preparing your answer…',
+
+    assistantNotCreated:
+      'The answer has not been created yet.',
+
+    assistantError:
+      'Could not create the AI answer.',
 
     askBooks:
       'Ask the Books',
+
+    askDescription:
+      'Ask specifically about the selected PDF books. Answers are based only on the library source material.',
 
     askQuestion:
       'Question',
 
     askQuestionPlaceholder:
-      'Ask for a summary, comparison, explanation, specific facts, textual details, or anything else about the selected books…',
-
-    askDescription:
-      'Ask anything about the selected PDF books. The answer is based only on the library source material.',
+      'Ask about the selected books: summaries, comparisons, facts, explanations, passages, dates, people, ideas, or other details…',
 
     askBooksButton:
       'Ask the Books',
@@ -251,7 +183,6 @@ const I18N = {
     sourceMaterialOnly:
       'Answers are based only on the selected PDF books.',
 
-
     works:
       'Works',
 
@@ -261,8 +192,8 @@ const I18N = {
     lectureWork:
       'Lecture',
 
-    poemWork:
-      'Poem',
+    assistantWork:
+      'AI Assistant',
 
     askWork:
       'Book question',
@@ -279,30 +210,6 @@ const I18N = {
     downloadWork:
       'Download',
 
-    bookmark:
-      'Bookmark',
-
-    bookmarked:
-      'Bookmarked',
-
-    removed:
-      'Removed',
-
-    noBookmarks:
-      'No bookmarks yet.',
-
-    openBookmark:
-      'Open',
-
-    removeBookmark:
-      'Remove bookmark',
-
-    backToLibrary:
-      'Back to Library',
-
-    aiNotConnected:
-      'AI generation is not connected yet.',
-
     noBooks:
       'No PDF books have been loaded yet.',
 
@@ -315,8 +222,8 @@ const I18N = {
     missingTopic:
       'Please enter a lecture topic.',
 
-    missingPoem:
-      'Please enter a poem prompt.',
+    missingAssistant:
+      'Please enter a message.',
 
     missingQuestion:
       'Please enter a question.',
@@ -328,90 +235,44 @@ const I18N = {
       'Could not create the answer.',
 
     lectureError:
-      'Could not create the lecture.',
-
-    poemError:
-      'Could not create the poem.'
+      'Could not create the lecture.'
 
   },
 
 
   sl: {
 
-    library:
-      'Knjižnica',
+    library: 'Knjižnica',
+    search: 'Iskanje',
+    create: 'Ustvari',
+    saved: 'Moja dela',
 
-    search:
-      'Iskanje',
+    books: 'Naložene knjige',
+    titles: 'naslovov',
 
-    create:
-      'Ustvari',
-
-    saved:
-      'Moja dela',
-
-    books:
-      'Naložene knjige',
-
-    titles:
-      'naslovov',
-
-    continue:
-      'Nadaljuj',
-
-    sources:
-      'Viri',
-
-    findSources:
-      'Poišči vire',
-
-    remove:
-      'Odstrani',
-
-    intent:
-      'Namen',
-
-    form:
-      'Oblika',
-
-    generateWork:
-      'Ustvari delo',
-
-    generate:
-      'Ustvari',
-
-    generatedWork:
-      'Ustvarjeno',
-
-    from:
-      'Iz',
-
-    saveWork:
-      'Shrani delo',
-
-    allBooks:
-      'Vse knjige',
-
-    passages:
-      'odlomkov',
+    sources: 'Viri',
+    passages: 'odlomkov',
 
     acrossBooks:
       'Išči po naloženih knjigah…',
-
-    endSection:
-      'Konec',
-
-    english:
-      'English',
-
-    slovenian:
-      'Slovenščina',
 
     noResults:
       'Odlomkov ni bilo mogoče najti',
 
     searching:
       'Pripravljam iskanje po knjižnici…',
+
+    preparingSearch:
+      'Pripravljam iskalni indeks…',
+
+    searchReady:
+      'Iskanje po knjižnici je pripravljeno',
+
+    rebuildingSearch:
+      'Gradim indeks knjižnice…',
+
+    searchHint:
+      'Išči po besedilu naloženih PDF knjig.',
 
     reader:
       'Bralnik',
@@ -425,33 +286,20 @@ const I18N = {
     openPage:
       'Odpri stran',
 
-    pagesIndexed:
-      'indeksiranih strani',
-
-    preparingSearch:
-      'Pripravljam iskalni indeks…',
-
-    searchReady:
-      'Iskanje po knjižnici je pripravljeno',
-
-    rebuildingSearch:
-      'Gradim indeks knjižnice…',
-
-    indexedPages:
-      'Indeksirane strani',
-
-    searchHint:
-      'Išči po besedilu naloženih PDF knjig.',
-
-
-    aiLecture:
-      'AI predavanje',
+    createWork:
+      'Ustvari',
 
     chooseBooks:
       'Izberi knjige',
 
     selectedBooks:
       'izbranih',
+
+    aiLecture:
+      'AI predavanje',
+
+    lectureDescription:
+      'Ustvari strukturirano predavanje s pomočjo izbranih knjig.',
 
     lectureTopic:
       'Tema predavanja',
@@ -483,31 +331,41 @@ const I18N = {
     createLecture:
       'Ustvari predavanje',
 
+    aiAssistant:
+      'AI pomočnik',
 
-    aiPoem:
-      'AI pesem',
+    assistantDescription:
+      'Uporabljaj AI povsem normalno. Ko je koristno, lahko uporabi tudi ustrezne podatke iz izbranih knjig.',
 
-    poemPrompt:
-      'Navodilo za pesem',
+    assistantPrompt:
+      'Sporočilo',
 
-    poemPromptPlaceholder:
-      'Opiši, kaj želiš: temo, število verzov, jezik, slog, razpoloženje, izraze, strukturo itd.',
+    assistantPlaceholder:
+      'Vprašaj karkoli, zahtevaj razlago, napiši besedilo, pripravi načrt, naredi povzetek ali odpri katerokoli temo…',
 
-    createPoem:
-      'Ustvari pesem',
+    assistantButton:
+      'Vprašaj AI',
 
+    assistantPreparing:
+      'AI pripravlja odgovor…',
+
+    assistantNotCreated:
+      'Odgovor še ni ustvarjen.',
+
+    assistantError:
+      'AI odgovora ni bilo mogoče ustvariti.',
 
     askBooks:
       'Vprašaj knjige',
+
+    askDescription:
+      'Postavi vprašanje posebej o izbranih PDF knjigah. Odgovori temeljijo samo na knjižničnem gradivu.',
 
     askQuestion:
       'Vprašanje',
 
     askQuestionPlaceholder:
-      'Vprašaj za povzetek, primerjavo, razlago, konkretne podatke, besedilne podrobnosti ali karkoli drugega o izbranih knjigah…',
-
-    askDescription:
-      'Postavi kakršnokoli vprašanje o vsebini izbranih PDF knjig. Odgovor temelji samo na knjižničnem gradivu.',
+      'Vprašaj o izbranih knjigah: povzetek, primerjava, dejstva, razlaga, odlomki, datumi, osebe, ideje ali druge podrobnosti…',
 
     askBooksButton:
       'Vprašaj knjige',
@@ -527,7 +385,6 @@ const I18N = {
     sourceMaterialOnly:
       'Odgovori temeljijo samo na izbranih PDF knjigah.',
 
-
     works:
       'Dela',
 
@@ -537,8 +394,8 @@ const I18N = {
     lectureWork:
       'Predavanje',
 
-    poemWork:
-      'Pesem',
+    assistantWork:
+      'AI pomočnik',
 
     askWork:
       'Vprašanje knjig',
@@ -555,30 +412,6 @@ const I18N = {
     downloadWork:
       'Prenesi',
 
-    bookmark:
-      'Zaznamek',
-
-    bookmarked:
-      'Zaznamovano',
-
-    removed:
-      'Odstranjeno',
-
-    noBookmarks:
-      'Zaenkrat ni zaznamkov.',
-
-    openBookmark:
-      'Odpri',
-
-    removeBookmark:
-      'Odstrani zaznamek',
-
-    backToLibrary:
-      'Nazaj v knjižnico',
-
-    aiNotConnected:
-      'AI generiranje še ni povezano.',
-
     noBooks:
       'Zaenkrat ni naloženih PDF knjig.',
 
@@ -591,8 +424,8 @@ const I18N = {
     missingTopic:
       'Najprej vpiši temo predavanja.',
 
-    missingPoem:
-      'Najprej napiši navodilo za pesem.',
+    missingAssistant:
+      'Najprej napiši sporočilo.',
 
     missingQuestion:
       'Najprej napiši vprašanje.',
@@ -604,10 +437,7 @@ const I18N = {
       'Odgovora ni bilo mogoče ustvariti.',
 
     lectureError:
-      'Predavanja ni bilo mogoče ustvariti.',
-
-    poemError:
-      'Pesmi ni bilo mogoče ustvariti.'
+      'Predavanja ni bilo mogoče ustvariti.'
 
   }
 
@@ -671,19 +501,19 @@ let state = {
   lecturePassages:
     [],
 
-  poemPrompt:
+  assistantPrompt:
     '',
 
-  poemGenerating:
+  assistantGenerating:
     false,
 
-  generatedPoem:
+  generatedAssistant:
     '',
 
-  poemError:
+  assistantError:
     '',
 
-  poemPassages:
+  assistantPassages:
     [],
 
   askPrompt:
@@ -702,7 +532,7 @@ let state = {
     [],
 
   creationType:
-    'lecture',
+    'assistant',
 
   works:
     [],
@@ -725,7 +555,6 @@ try {
         'universal-ai-library-state'
       ) || '{}'
     );
-
 
   Object.assign(
     state,
@@ -756,78 +585,29 @@ if (
 
 }
 
-
-if (
-  !Array.isArray(
-    state.sources
-  )
-) {
-
-  state.sources =
-    [];
-
+if (!Array.isArray(state.sources)) {
+  state.sources = [];
 }
 
-
-if (
-  !Array.isArray(
-    state.works
-  )
-) {
-
-  state.works =
-    [];
-
+if (!Array.isArray(state.works)) {
+  state.works = [];
 }
 
-
-if (
-  !Array.isArray(
-    state.bookmarks
-  )
-) {
-
-  state.bookmarks =
-    [];
-
+if (!Array.isArray(state.bookmarks)) {
+  state.bookmarks = [];
 }
 
-
-if (
-  !Array.isArray(
-    state.lecturePassages
-  )
-) {
-
-  state.lecturePassages =
-    [];
-
+if (!Array.isArray(state.lecturePassages)) {
+  state.lecturePassages = [];
 }
 
-
-if (
-  !Array.isArray(
-    state.poemPassages
-  )
-) {
-
-  state.poemPassages =
-    [];
-
+if (!Array.isArray(state.assistantPassages)) {
+  state.assistantPassages = [];
 }
 
-
-if (
-  !Array.isArray(
-    state.askPassages
-  )
-) {
-
-  state.askPassages =
-    [];
-
+if (!Array.isArray(state.askPassages)) {
+  state.askPassages = [];
 }
-
 
 state.lectureLength =
   String(
@@ -835,18 +615,14 @@ state.lectureLength =
     '20'
   );
 
-
 if (
-  state.creationType !==
-    'lecture' &&
-  state.creationType !==
-    'poem' &&
-  state.creationType !==
-    'ask'
+  state.creationType !== 'lecture' &&
+  state.creationType !== 'assistant' &&
+  state.creationType !== 'ask'
 ) {
 
   state.creationType =
-    'lecture';
+    'assistant';
 
 }
 
@@ -855,14 +631,10 @@ if (
    GENERAL
    ========================================================= */
 
-function t(
-  key
-) {
+function t(key) {
 
   return (
-    I18N[
-      state.lang
-    ]?.[key] ||
+    I18N[state.lang]?.[key] ||
     I18N.en[key] ||
     key
   );
@@ -874,15 +646,11 @@ function t(
    PDF URL
    ========================================================= */
 
-function githubRawPdfUrl(
-  filename
-) {
+function githubRawPdfUrl(filename) {
 
   return (
     GITHUB_RAW_BASE +
-    encodeURIComponent(
-      filename
-    )
+    encodeURIComponent(filename)
   );
 
 }
@@ -899,8 +667,8 @@ async function loadBooksFromGitHub() {
     const response =
       await fetch(
         GITHUB_BOOKS_API +
-          '?_=' +
-          Date.now(),
+        '?_=' +
+        Date.now(),
         {
           cache:
             'no-store',
@@ -912,7 +680,6 @@ async function loadBooksFromGitHub() {
         }
       );
 
-
     if (!response.ok) {
 
       throw new Error(
@@ -922,16 +689,10 @@ async function loadBooksFromGitHub() {
 
     }
 
-
     const files =
       await response.json();
 
-
-    if (
-      !Array.isArray(
-        files
-      )
-    ) {
+    if (!Array.isArray(files)) {
 
       throw new Error(
         'GitHub did not return a file list.'
@@ -939,130 +700,92 @@ async function loadBooksFromGitHub() {
 
     }
 
-
     const pdfFiles =
       files.filter(
         file =>
           file &&
-          file.type ===
-            'file' &&
+          file.type === 'file' &&
           /\.pdf$/i.test(
-            file.name ||
-            ''
+            file.name || ''
           )
       );
 
-
     BOOKS =
       pdfFiles
-        .map(
-          file => {
+        .map(file => {
 
-            const title =
-              String(
-                file.name ||
-                ''
-              )
-                .replace(
-                  /\.pdf$/i,
-                  ''
-                );
-
-
-            return {
-
-              id:
-                'pdf-' +
-                encodeURIComponent(
-                  file.name
-                ),
-
-              short:
-                title,
-
-              author:
-                '',
-
-              script:
-                'PDF',
-
-              filename:
-                file.name,
-
-              pdf:
-                file.download_url ||
-                githubRawPdfUrl(
-                  file.name
-                )
-
-            };
-
-          }
-        )
-        .sort(
-          (
-            a,
-            b
-          ) =>
+          const title =
             String(
-              a.short ||
+              file.name || ''
+            ).replace(
+              /\.pdf$/i,
               ''
-            ).localeCompare(
-              String(
-                b.short ||
-                ''
+            );
+
+          return {
+
+            id:
+              'pdf-' +
+              encodeURIComponent(
+                file.name
               ),
-              undefined,
-              {
-                sensitivity:
-                  'base'
-              }
-            )
+
+            short:
+              title,
+
+            author:
+              '',
+
+            script:
+              'PDF',
+
+            filename:
+              file.name,
+
+            pdf:
+              file.download_url ||
+              githubRawPdfUrl(
+                file.name
+              )
+
+          };
+
+        })
+        .sort(
+          (a, b) =>
+            String(a.short || '')
+              .localeCompare(
+                String(b.short || ''),
+                undefined,
+                {
+                  sensitivity:
+                    'base'
+                }
+              )
         );
-
-
-    /*
-     * Vse trenutno naložene knjige
-     * postanejo privzeto izbrane.
-     */
 
     state.sources =
       BOOKS.map(
-        (
-          book,
+        (_, index) =>
           index
-        ) => index
       );
 
-
-    if (
-      BOOKS.length >
-      0
-    ) {
+    if (BOOKS.length > 0) {
 
       state.book =
         Math.max(
           0,
           Math.min(
-            Number(
-              state.book
-            ) || 0,
-            BOOKS.length -
-              1
+            Number(state.book) || 0,
+            BOOKS.length - 1
           )
         );
 
     } else {
 
-      state.book =
-        0;
+      state.book = 0;
 
     }
-
-
-    /*
-     * Poskrbimo za čist indeks.
-     */
 
     state.searchReady =
       false;
@@ -1073,26 +796,14 @@ async function loadBooksFromGitHub() {
     state.searchIndex =
       [];
 
-
     save();
     render();
-
 
     console.log(
       'Universal AI Library:',
       BOOKS.length,
       'books loaded.'
     );
-
-
-    console.log(
-      'PDF files:',
-      pdfFiles.map(
-        file =>
-          file.name
-      )
-    );
-
 
   } catch (error) {
 
@@ -1101,31 +812,17 @@ async function loadBooksFromGitHub() {
       error
     );
 
+    BOOKS = [];
 
-    BOOKS =
-      [];
-
-
-    state.sources =
-      [];
-
-
-    state.searchReady =
-      false;
-
-
-    state.searchIndex =
-      [];
-
+    state.sources = [];
+    state.searchReady = false;
+    state.searchIndex = [];
 
     save();
     render();
 
-
     toast(
-      t(
-        'githubError'
-      )
+      t('githubError')
     );
 
   }
@@ -1179,17 +876,17 @@ function save() {
       lecturePassages:
         state.lecturePassages,
 
-      poemPrompt:
-        state.poemPrompt,
+      assistantPrompt:
+        state.assistantPrompt,
 
-      generatedPoem:
-        state.generatedPoem,
+      generatedAssistant:
+        state.generatedAssistant,
 
-      poemError:
-        state.poemError,
+      assistantError:
+        state.assistantError,
 
-      poemPassages:
-        state.poemPassages,
+      assistantPassages:
+        state.assistantPassages,
 
       askPrompt:
         state.askPrompt,
@@ -1214,7 +911,6 @@ function save() {
 
     };
 
-
     localStorage.setItem(
       'universal-ai-library-state',
       JSON.stringify(
@@ -1238,13 +934,10 @@ function save() {
    ESCAPING
    ========================================================= */
 
-function escapeHtml(
-  value
-) {
+function escapeHtml(value) {
 
   return String(
-    value ??
-    ''
+    value ?? ''
   )
     .replace(
       /&/g,
@@ -1269,14 +962,10 @@ function escapeHtml(
 
 }
 
-
-function escapeAttribute(
-  value
-) {
+function escapeAttribute(value) {
 
   return String(
-    value ??
-    ''
+    value ?? ''
   )
     .replace(
       /\\/g,
@@ -1294,9 +983,7 @@ function escapeAttribute(
    LANGUAGE
    ========================================================= */
 
-function setLanguage(
-  lang
-) {
+function setLanguage(lang) {
 
   if (
     lang !== 'en' &&
@@ -1307,10 +994,8 @@ function setLanguage(
 
   }
 
-
   state.lang =
     lang;
-
 
   save();
   render();
@@ -1322,26 +1007,17 @@ function setLanguage(
    NAVIGATION
    ========================================================= */
 
-function go(
-  screen
-) {
+function go(screen) {
 
   state.screen =
     screen;
 
-
   save();
   render();
 
-
   window.scrollTo({
-
-    top:
-      0,
-
-    behavior:
-      'smooth'
-
+    top: 0,
+    behavior: 'smooth'
   });
 
 }
@@ -1351,16 +1027,12 @@ function go(
    TOAST
    ========================================================= */
 
-function toast(
-  message
-) {
+function toast(message) {
 
   state.toast =
     message;
 
-
   render();
-
 
   setTimeout(
     () => {
@@ -1390,8 +1062,7 @@ function languageSelector() {
       <button
         type="button"
         class="chip ${
-          state.lang ===
-          'en'
+          state.lang === 'en'
             ? 'on'
             : ''
         }"
@@ -1403,12 +1074,10 @@ function languageSelector() {
 
       </button>
 
-
       <button
         type="button"
         class="chip ${
-          state.lang ===
-          'sl'
+          state.lang === 'sl'
             ? 'on'
             : ''
         }"
@@ -1428,7 +1097,7 @@ function languageSelector() {
 
 
 /* =========================================================
-   NAV
+   NAVIGATION
    ========================================================= */
 
 function nav() {
@@ -1460,19 +1129,12 @@ function nav() {
         ]
       ]
         .map(
-          (
-            [
-              key,
-              icon,
-              label
-            ]
-          ) => `
+          ([key, icon, label]) => `
 
             <button
               type="button"
               class="${
-                state.screen ===
-                key
+                state.screen === key
                   ? 'active'
                   : ''
               }"
@@ -1503,9 +1165,7 @@ function nav() {
    LAYOUT
    ========================================================= */
 
-function layout(
-  body
-) {
+function layout(body) {
 
   return `
 
@@ -1521,9 +1181,7 @@ function layout(
 
         </div>
 
-
         ${nav()}
-
 
         ${
           state.toast
@@ -1564,13 +1222,11 @@ function library() {
 
     </div>
 
-
     <h1>
 
       AI Book Library
 
     </h1>
-
 
     <div class="section">
 
@@ -1588,7 +1244,6 @@ function library() {
 
         </h3>
 
-
         <span class="muted">
 
           ${BOOKS.length}
@@ -1599,7 +1254,6 @@ function library() {
 
       </div>
 
-
       ${
         BOOKS.length
 
@@ -1608,10 +1262,7 @@ function library() {
             <div class="grid">
 
               ${BOOKS.map(
-                (
-                  book,
-                  index
-                ) => `
+                (book, index) => `
 
                   <div
                     class="book"
@@ -1650,16 +1301,7 @@ function library() {
                 padding:20px 0
               ">
 
-              ${
-                BOOKS.length ===
-                0
-                  ? t(
-                      'noBooks'
-                    )
-                  : t(
-                      'loading'
-                    )
-              }
+              ${t('noBooks')}
 
             </div>
 
@@ -1677,28 +1319,20 @@ function library() {
    OPEN BOOK
    ========================================================= */
 
-function openBook(
-  index
-) {
+function openBook(index) {
 
   const book =
-    BOOKS[
-      index
-    ];
-
+    BOOKS[index];
 
   if (!book) {
     return;
   }
 
-
   state.book =
     index;
 
-
   state.screen =
     'reader';
-
 
   save();
   render();
@@ -1710,27 +1344,20 @@ function openBook(
    OPEN PDF
    ========================================================= */
 
-function openPdf(
-  file,
-  page
-) {
+function openPdf(file, page) {
 
   if (!file) {
     return;
   }
-
 
   const target =
     page
       ? (
           file +
           '#page=' +
-          encodeURIComponent(
-            page
-          )
+          encodeURIComponent(page)
         )
       : file;
-
 
   window.open(
     target,
@@ -1748,10 +1375,7 @@ function openPdf(
 function reader() {
 
   const book =
-    BOOKS[
-      state.book
-    ];
-
+    BOOKS[state.book];
 
   if (!book) {
 
@@ -1763,7 +1387,6 @@ function reader() {
 
       </h2>
 
-
       <div class="muted">
 
         ${t('noBooks')}
@@ -1773,7 +1396,6 @@ function reader() {
     `);
 
   }
-
 
   return layout(`
 
@@ -1790,7 +1412,6 @@ function reader() {
 
       </button>
 
-
       <div style="flex:1">
 
         <strong>
@@ -1805,7 +1426,6 @@ function reader() {
 
     </div>
 
-
     <div class="section">
 
       <div class="eyebrow">
@@ -1814,7 +1434,6 @@ function reader() {
 
       </div>
 
-
       <h2>
 
         ${escapeHtml(
@@ -1822,7 +1441,6 @@ function reader() {
         )}
 
       </h2>
-
 
       <button
         type="button"
@@ -1847,48 +1465,38 @@ function reader() {
 
 
 /* =========================================================
-   PDF SEARCH ENGINE
+   PDF SEARCH
    ========================================================= */
 
 const PDFJS_VERSION =
   '6.2.108';
 
-
 const SEARCH_DB_NAME =
   'universal-ai-library-search-db';
-
 
 const SEARCH_DB_VERSION =
   1;
 
-
 const SEARCH_STORE_NAME =
   'pages';
 
-
 let pdfjsPromise =
   null;
-
 
 let searchFocusFrame =
   null;
 
 
 /* =========================================================
-   NORMALIZE SEARCH TEXT
+   NORMALIZE SEARCH
    ========================================================= */
 
-function normalizeSearchText(
-  value
-) {
+function normalizeSearchText(value) {
 
   return String(
-    value ||
-    ''
+    value || ''
   )
-    .normalize(
-      'NFD'
-    )
+    .normalize('NFD')
     .replace(
       /[\u0300-\u036f]/g,
       ''
@@ -1902,9 +1510,7 @@ function normalizeSearchText(
    SEARCH SNIPPET
    ========================================================= */
 
-function makeSearchSnippet(
-  result
-) {
+function makeSearchSnippet(result) {
 
   const text =
     String(
@@ -1918,7 +1524,6 @@ function makeSearchSnippet(
       )
       .trim();
 
-
   if (
     text.length <=
     320
@@ -1928,18 +1533,15 @@ function makeSearchSnippet(
 
   }
 
-
   const query =
     normalizeSearchText(
       state.query
     );
 
-
   const normalized =
     normalizeSearchText(
       text
     );
-
 
   const position =
     query
@@ -1947,7 +1549,6 @@ function makeSearchSnippet(
           query
         )
       : -1;
-
 
   if (
     position >=
@@ -1960,13 +1561,11 @@ function makeSearchSnippet(
         position - 120
       );
 
-
     const end =
       Math.min(
         text.length,
         start + 320
       );
-
 
     return (
       (
@@ -1986,7 +1585,6 @@ function makeSearchSnippet(
     );
 
   }
-
 
   return (
     text.slice(
@@ -2021,8 +1619,7 @@ function getPdfEntries() {
           book.short,
 
         author:
-          book.author ||
-          '',
+          book.author || '',
 
         chapterTitle:
           'PDF',
@@ -2062,14 +1659,12 @@ async function getPdfJs() {
               PDFJS_VERSION +
               '/build/pdf.worker.min.mjs';
 
-
           return pdfjsLib;
 
         }
       );
 
   }
-
 
   return pdfjsPromise;
 
@@ -2101,11 +1696,9 @@ function openSearchDatabase() {
           )
         );
 
-
         return;
 
       }
-
 
       const request =
         indexedDB.open(
@@ -2113,13 +1706,11 @@ function openSearchDatabase() {
           SEARCH_DB_VERSION
         );
 
-
       request.onupgradeneeded =
         function () {
 
           const db =
             request.result;
-
 
           if (
             !db.objectStoreNames.contains(
@@ -2136,7 +1727,6 @@ function openSearchDatabase() {
                 }
               );
 
-
             store.createIndex(
               'bookId',
               'bookId',
@@ -2145,7 +1735,6 @@ function openSearchDatabase() {
                   false
               }
             );
-
 
             store.createIndex(
               'pdf',
@@ -2160,7 +1749,6 @@ function openSearchDatabase() {
 
         };
 
-
       request.onsuccess =
         function () {
 
@@ -2169,7 +1757,6 @@ function openSearchDatabase() {
           );
 
         };
-
 
       request.onerror =
         function () {
@@ -2211,21 +1798,17 @@ function clearSearchDatabase() {
                 'readwrite'
               );
 
-
             const store =
               transaction.objectStore(
                 SEARCH_STORE_NAME
               );
 
-
             const request =
               store.clear();
-
 
             request.onsuccess =
               () =>
                 resolve();
-
 
             request.onerror =
               () =>
@@ -2233,11 +1816,9 @@ function clearSearchDatabase() {
                   request.error
                 );
 
-
             transaction.oncomplete =
               () =>
                 db.close();
-
 
             transaction.onerror =
               () =>
@@ -2276,16 +1857,13 @@ function loadCachedSearchIndex() {
                 'readonly'
               );
 
-
             const store =
               transaction.objectStore(
                 SEARCH_STORE_NAME
               );
 
-
             const request =
               store.getAll();
-
 
             request.onsuccess =
               function () {
@@ -2294,9 +1872,7 @@ function loadCachedSearchIndex() {
                   request.result ||
                   [];
 
-
                 db.close();
-
 
                 resolve(
                   rows
@@ -2304,12 +1880,10 @@ function loadCachedSearchIndex() {
 
               };
 
-
             request.onerror =
               function () {
 
                 db.close();
-
 
                 reject(
                   request.error
@@ -2330,9 +1904,7 @@ function loadCachedSearchIndex() {
    SAVE SEARCH ROWS
    ========================================================= */
 
-function saveSearchRows(
-  rows
-) {
+function saveSearchRows(rows) {
 
   return openSearchDatabase()
     .then(
@@ -2350,12 +1922,10 @@ function saveSearchRows(
                 'readwrite'
               );
 
-
             const store =
               transaction.objectStore(
                 SEARCH_STORE_NAME
               );
-
 
             rows.forEach(
               row => {
@@ -2367,16 +1937,13 @@ function saveSearchRows(
               }
             );
 
-
             transaction.oncomplete =
               function () {
 
                 db.close();
-
                 resolve();
 
               };
-
 
             transaction.onerror =
               function () {
@@ -2422,7 +1989,6 @@ function makeSearchRow(
         ' '
       )
       .trim();
-
 
   return {
 
@@ -2482,14 +2048,10 @@ async function buildPdfSearchIndex() {
   const pdfjsLib =
     await getPdfJs();
 
-
   const entries =
     getPdfEntries();
 
-
-  const rows =
-    [];
-
+  const rows = [];
 
   for (
     let entryIndex = 0;
@@ -2503,10 +2065,8 @@ async function buildPdfSearchIndex() {
         entryIndex
       ];
 
-
     const loadingTask =
       pdfjsLib.getDocument({
-
         url:
           entry.pdf,
 
@@ -2515,10 +2075,8 @@ async function buildPdfSearchIndex() {
 
       });
 
-
     const pdf =
       await loadingTask.promise;
-
 
     for (
       let pageNumber = 1;
@@ -2532,10 +2090,8 @@ async function buildPdfSearchIndex() {
           pageNumber
         );
 
-
       const content =
         await page.getTextContent();
-
 
       const text =
         content.items
@@ -2550,7 +2106,6 @@ async function buildPdfSearchIndex() {
             ' '
           )
           .trim();
-
 
       if (text) {
 
@@ -2568,7 +2123,6 @@ async function buildPdfSearchIndex() {
 
       }
 
-
       if (
         state.screen ===
         'search'
@@ -2577,13 +2131,11 @@ async function buildPdfSearchIndex() {
         state.searchIndex =
           rows.slice();
 
-
         render();
 
       }
 
     }
-
 
     try {
 
@@ -2592,7 +2144,6 @@ async function buildPdfSearchIndex() {
     } catch (error) {}
 
   }
-
 
   return {
     rows
@@ -2615,14 +2166,11 @@ async function buildSearchIndex() {
 
   }
 
-
   state.searchLoading =
     true;
 
-
   state.searchReady =
     false;
-
 
   if (
     state.screen ===
@@ -2633,12 +2181,10 @@ async function buildSearchIndex() {
 
   }
 
-
   try {
 
     const expectedEntries =
       getPdfEntries();
-
 
     if (
       !expectedEntries.length
@@ -2654,10 +2200,8 @@ async function buildSearchIndex() {
 
     }
 
-
     let cachedRows =
       [];
-
 
     try {
 
@@ -2673,7 +2217,6 @@ async function buildSearchIndex() {
 
     }
 
-
     const expectedIds =
       new Set(
         expectedEntries.map(
@@ -2684,14 +2227,12 @@ async function buildSearchIndex() {
         )
       );
 
-
     const cachedPdfRows =
       cachedRows.filter(
         row =>
           row &&
           row.pdf
       );
-
 
     const cachedIds =
       new Set(
@@ -2702,7 +2243,6 @@ async function buildSearchIndex() {
             row.pdf
         )
       );
-
 
     const cacheComplete =
       expectedIds.size >
@@ -2718,10 +2258,8 @@ async function buildSearchIndex() {
           )
       );
 
-
     let pdfRows =
       [];
-
 
     if (
       cacheComplete
@@ -2729,7 +2267,6 @@ async function buildSearchIndex() {
 
       pdfRows =
         cachedPdfRows;
-
 
       console.log(
         'Universal AI Library: cached search index used.',
@@ -2752,14 +2289,11 @@ async function buildSearchIndex() {
 
       }
 
-
       const built =
         await buildPdfSearchIndex();
 
-
       pdfRows =
         built.rows;
-
 
       try {
 
@@ -2778,14 +2312,11 @@ async function buildSearchIndex() {
 
     }
 
-
     state.searchIndex =
       pdfRows;
 
-
     state.searchReady =
       true;
-
 
   } catch (error) {
 
@@ -2794,26 +2325,20 @@ async function buildSearchIndex() {
       error
     );
 
-
     state.searchIndex =
       [];
-
 
     state.searchReady =
       false;
 
-
     toast(
-      t(
-        'searching'
-      )
+      t('searching')
     );
 
   } finally {
 
     state.searchLoading =
       false;
-
 
     if (
       state.screen ===
@@ -2830,19 +2355,15 @@ async function buildSearchIndex() {
 
 
 /* =========================================================
-   SEARCH QUERY
+   SEARCH INPUT
    ========================================================= */
 
-function setSearchQuery(
-  value
-) {
+function setSearchQuery(value) {
 
   state.query =
     value;
 
-
   render();
-
 
   if (
     searchFocusFrame !==
@@ -2855,7 +2376,6 @@ function setSearchQuery(
 
   }
 
-
   searchFocusFrame =
     requestAnimationFrame(
       () => {
@@ -2863,21 +2383,17 @@ function setSearchQuery(
         searchFocusFrame =
           null;
 
-
         const input =
           document.querySelector(
             '.search'
           );
 
-
         if (input) {
 
           input.focus();
 
-
           const end =
             input.value.length;
-
 
           input.setSelectionRange(
             end,
@@ -2896,13 +2412,10 @@ function setSearchQuery(
    SEARCH FILTER
    ========================================================= */
 
-function setSearchFilter(
-  value
-) {
+function setSearchFilter(value) {
 
   state.filter =
     value;
-
 
   save();
   render();
@@ -2921,10 +2434,8 @@ function getVisibleSearchResults() {
       state.query.trim()
     );
 
-
   let results =
     state.searchIndex;
-
 
   if (
     query
@@ -2947,7 +2458,6 @@ function getVisibleSearchResults() {
               ].join(' ')
             );
 
-
           return text.includes(
             query
           );
@@ -2956,7 +2466,6 @@ function getVisibleSearchResults() {
       );
 
   }
-
 
   return results;
 
@@ -2978,7 +2487,6 @@ function search() {
 
   }
 
-
   if (
     !state.searchReady
   ) {
@@ -2990,7 +2498,6 @@ function search() {
         ${t('search')}
 
       </h2>
-
 
       <input
         class="search"
@@ -3005,7 +2512,6 @@ function search() {
         placeholder="${t(
           'acrossBooks'
         )}">
-
 
       <div
         class="muted"
@@ -3029,10 +2535,8 @@ function search() {
 
   }
 
-
   const results =
     getVisibleSearchResults();
-
 
   return layout(`
 
@@ -3041,7 +2545,6 @@ function search() {
       ${t('search')}
 
     </h2>
-
 
     <input
       class="search"
@@ -3057,7 +2560,6 @@ function search() {
         'acrossBooks'
       )}">
 
-
     <div
       class="muted"
       style="
@@ -3070,7 +2572,6 @@ function search() {
       )}
 
     </div>
-
 
     <div
       class="muted"
@@ -3085,7 +2586,6 @@ function search() {
       )}
 
     </div>
-
 
     ${
       results.length
@@ -3124,7 +2624,6 @@ function search() {
 
                   </div>
 
-
                   <div
                     class="muted">
 
@@ -3133,7 +2632,6 @@ function search() {
                     )}
 
                   </div>
-
 
                   <div
                     style="
@@ -3149,7 +2647,6 @@ function search() {
                     )}
 
                   </div>
-
 
                   <button
                     type="button"
@@ -3168,10 +2665,11 @@ function search() {
                           result.page
                         )}
                       );
-
                     ">
 
-                    ${t('openPage')}
+                    ${t(
+                      'openPage'
+                    )}
 
                   </button>
 
@@ -3203,24 +2701,19 @@ function search() {
    OPEN SEARCH RESULT
    ========================================================= */
 
-function openSearchResult(
-  index
-) {
+function openSearchResult(index) {
 
   const results =
     getVisibleSearchResults();
-
 
   const result =
     results[
       index
     ];
 
-
   if (!result) {
     return;
   }
-
 
   openPdf(
     result.pdf,
@@ -3234,9 +2727,7 @@ function openSearchResult(
    SOURCE SELECTION
    ========================================================= */
 
-function toggleLectureSource(
-  index
-) {
+function toggleLectureSource(index) {
 
   if (
     state.sources.includes(
@@ -3247,8 +2738,7 @@ function toggleLectureSource(
     state.sources =
       state.sources.filter(
         item =>
-          item !==
-          index
+          item !== index
       );
 
   } else {
@@ -3260,7 +2750,6 @@ function toggleLectureSource(
 
   }
 
-
   save();
   render();
 
@@ -3271,9 +2760,7 @@ function toggleLectureSource(
    FORM INPUTS
    ========================================================= */
 
-function setLectureTopic(
-  value
-) {
+function setLectureTopic(value) {
 
   state.lectureTopic =
     value;
@@ -3282,37 +2769,26 @@ function setLectureTopic(
 
 }
 
-
-function setLectureLength(
-  value
-) {
+function setLectureLength(value) {
 
   state.lectureLength =
-    String(
-      value
-    );
+    String(value);
 
   save();
   render();
 
 }
 
+function setAssistantPrompt(value) {
 
-function setPoemPrompt(
-  value
-) {
-
-  state.poemPrompt =
+  state.assistantPrompt =
     value;
 
   save();
 
 }
 
-
-function setAskPrompt(
-  value
-) {
+function setAskPrompt(value) {
 
   state.askPrompt =
     value;
@@ -3338,7 +2814,6 @@ function findAiPassages(
       ).trim()
     );
 
-
   const allowedBookIds =
     new Set(
       state.sources
@@ -3353,7 +2828,6 @@ function findAiPassages(
         )
     );
 
-
   let candidates =
     state.searchIndex.filter(
       row =>
@@ -3364,12 +2838,9 @@ function findAiPassages(
         )
     );
 
-
   const words =
     instruction
-      .split(
-        /\s+/
-      )
+      .split(/\s+/)
       .map(
         word =>
           normalizeSearchText(
@@ -3384,7 +2855,6 @@ function findAiPassages(
           word.length >=
           3
       );
-
 
   candidates =
     candidates.map(
@@ -3403,10 +2873,8 @@ function findAiPassages(
             ].join(' ')
           );
 
-
         let score =
           0;
-
 
         words.forEach(
           word => {
@@ -3425,7 +2893,6 @@ function findAiPassages(
           }
         );
 
-
         if (
           instruction &&
           text.includes(
@@ -3438,13 +2905,11 @@ function findAiPassages(
 
         }
 
-
         const titleText =
           normalizeSearchText(
             row.bookTitle ||
             ''
           );
-
 
         words.forEach(
           word => {
@@ -3463,7 +2928,6 @@ function findAiPassages(
           }
         );
 
-
         return {
 
           ...row,
@@ -3475,7 +2939,6 @@ function findAiPassages(
 
       }
     );
-
 
   candidates =
     candidates
@@ -3502,7 +2965,6 @@ function findAiPassages(
 
           }
 
-
           return (
             Number(
               a.page ||
@@ -3516,12 +2978,6 @@ function findAiPassages(
 
         }
       );
-
-
-  /*
-   * Pošljemo največ 24 najbolj
-   * relevantnih strani.
-   */
 
   return candidates
     .slice(
@@ -3543,7 +2999,6 @@ function findAiPassages(
             )
             .trim();
 
-
         const text =
           rawText.length >
           2600
@@ -3557,7 +3012,6 @@ function findAiPassages(
               )
 
             : rawText;
-
 
         return {
 
@@ -3613,10 +3067,10 @@ function saveGeneratedWork(
       work.title ||
       (
         work.type ===
-        'poem'
+        'assistant'
 
           ? t(
-              'aiPoem'
+              'aiAssistant'
             )
 
           : work.type ===
@@ -3659,7 +3113,6 @@ function saveGeneratedWork(
 
   };
 
-
   state.works = [
 
     item,
@@ -3673,16 +3126,13 @@ function saveGeneratedWork(
 
   ];
 
-
   state.works =
     state.works.slice(
       0,
       30
     );
 
-
   save();
-
 
   return item;
 
@@ -3690,7 +3140,7 @@ function saveGeneratedWork(
 
 
 /* =========================================================
-   FORMAT WORK DATE
+   FORMAT DATE
    ========================================================= */
 
 function formatWorkDate(
@@ -3700,7 +3150,6 @@ function formatWorkDate(
   if (!value) {
     return '';
   }
-
 
   try {
 
@@ -3730,6 +3179,102 @@ function formatWorkDate(
 
 
 /* =========================================================
+   MARKDOWN TO HTML
+   ========================================================= */
+
+function markdownToHtml(
+  text
+) {
+
+  let html =
+    escapeHtml(
+      text
+    );
+
+  html =
+    html.replace(
+      /^### (.*)$/gm,
+      '<h3>$1</h3>'
+    );
+
+  html =
+    html.replace(
+      /^## (.*)$/gm,
+      '<h2>$1</h2>'
+    );
+
+  html =
+    html.replace(
+      /^# (.*)$/gm,
+      '<h1>$1</h1>'
+    );
+
+  html =
+    html.replace(
+      /\*\*(.*?)\*\*/g,
+      '<strong>$1</strong>'
+    );
+
+  html =
+    html.replace(
+      /^---$/gm,
+      '<hr>'
+    );
+
+  const blocks =
+    html
+      .split(
+        /\n\s*\n/
+      )
+      .map(
+        block =>
+          block.trim()
+      )
+      .filter(
+        Boolean
+      );
+
+  return blocks
+    .map(
+      block => {
+
+        if (
+          block.startsWith(
+            '<h1>'
+          ) ||
+          block.startsWith(
+            '<h2>'
+          ) ||
+          block.startsWith(
+            '<h3>'
+          ) ||
+          block ===
+            '<hr>'
+        ) {
+
+          return block;
+
+        }
+
+        return (
+          '<p>' +
+          block.replace(
+            /\n/g,
+            '<br>'
+          ) +
+          '</p>'
+        );
+
+      }
+    )
+    .join(
+      '\n'
+    );
+
+}
+
+
+/* =========================================================
    DOWNLOAD SAVED WORK
    ========================================================= */
 
@@ -3742,33 +3287,23 @@ function downloadSavedWork(
       index
     ];
 
-
   if (!work) {
     return;
   }
 
-
-  const isPoem =
-    work.type ===
-    'poem';
-
-
-  const isAsk =
-    work.type ===
-    'ask';
-
-
   const typeLabel =
-    isPoem
+    work.type ===
+      'assistant'
 
       ? (
           state.lang ===
           'sl'
-            ? 'AI pesem'
-            : 'AI Poem'
+            ? 'AI pomočnik'
+            : 'AI Assistant'
         )
 
-      : isAsk
+      : work.type ===
+        'ask'
 
         ? (
             state.lang ===
@@ -3784,136 +3319,28 @@ function downloadSavedWork(
               : 'AI Lecture'
           );
 
-
   const title =
     String(
       work.title ||
       typeLabel
-    )
-      .trim();
-
+    ).trim();
 
   const prompt =
     String(
       work.prompt ||
       ''
-    )
-      .trim();
-
+    ).trim();
 
   const content =
     String(
       work.content ||
       ''
-    )
-      .trim();
-
-
-  function markdownToHtml(
-    text
-  ) {
-
-    let html =
-      escapeHtml(
-        text
-      );
-
-
-    html =
-      html.replace(
-        /^### (.*)$/gm,
-        '<h3>$1</h3>'
-      );
-
-
-    html =
-      html.replace(
-        /^## (.*)$/gm,
-        '<h2>$1</h2>'
-      );
-
-
-    html =
-      html.replace(
-        /^# (.*)$/gm,
-        '<h1>$1</h1>'
-      );
-
-
-    html =
-      html.replace(
-        /\*\*(.*?)\*\*/g,
-        '<strong>$1</strong>'
-      );
-
-
-    html =
-      html.replace(
-        /^---$/gm,
-        '<hr>'
-      );
-
-
-    const blocks =
-      html
-        .split(
-          /\n\s*\n/
-        )
-        .map(
-          block =>
-            block.trim()
-        )
-        .filter(
-          Boolean
-        );
-
-
-    return blocks
-      .map(
-        block => {
-
-          if (
-            block.startsWith(
-              '<h1>'
-            ) ||
-            block.startsWith(
-              '<h2>'
-            ) ||
-            block.startsWith(
-              '<h3>'
-            ) ||
-            block ===
-              '<hr>'
-          ) {
-
-            return block;
-
-          }
-
-
-          return (
-            '<p>' +
-            block.replace(
-              /\n/g,
-              '<br>'
-            ) +
-            '</p>'
-          );
-
-        }
-      )
-      .join(
-        '\n'
-      );
-
-  }
-
+    ).trim();
 
   const contentHtml =
     markdownToHtml(
       content
     );
-
 
   const promptHtml =
     prompt
@@ -3922,16 +3349,14 @@ function downloadSavedWork(
         )
       : '';
 
-
   const sourceList =
     Array.isArray(
       work.passages
     )
       ? work.passages
           .map(
-            passage => {
-
-              return `
+            passage =>
+              `
                 <li>
 
                   ${escapeHtml(
@@ -3963,15 +3388,12 @@ function downloadSavedWork(
                   }
 
                 </li>
-              `;
-
-            }
+              `
           )
           .join(
             '\n'
           )
       : '';
-
 
   const sourceLabel =
     state.lang ===
@@ -3979,13 +3401,11 @@ function downloadSavedWork(
       ? 'Viri'
       : 'Sources';
 
-
   const questionLabel =
     state.lang ===
     'sl'
       ? 'Vprašanje'
-      : 'Question';
-
+      : 'Request';
 
   const createdLabel =
     state.lang ===
@@ -3993,11 +3413,17 @@ function downloadSavedWork(
       ? 'Ustvarjeno'
       : 'Created';
 
-
   const htmlDocument = `
 <!doctype html>
 
-<html lang="${state.lang === 'sl' ? 'sl' : 'en'}">
+<html
+  lang="${
+    state.lang ===
+    'sl'
+      ? 'sl'
+      : 'en'
+  }"
+>
 
 <head>
 
@@ -4013,25 +3439,6 @@ ${escapeHtml(
   title
 )}
 </title>
-
-
-<link
-  rel="preconnect"
-  href="https://fonts.googleapis.com"
->
-
-
-<link
-  rel="preconnect"
-  href="https://fonts.gstatic.com"
-  crossorigin
->
-
-
-<link
-  href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap"
-  rel="stylesheet"
->
 
 
 <style>
@@ -4056,7 +3463,7 @@ body {
     #2d2924;
 
   font-family:
-    "Noto Sans",
+    Arial,
     sans-serif;
 
   line-height:
@@ -4103,7 +3510,7 @@ h2,
 h3 {
 
   font-family:
-    "Noto Serif",
+    Georgia,
     serif;
 
 }
@@ -4225,7 +3632,6 @@ p {
 
         </h3>
 
-
         <div>
 
           ${promptHtml}
@@ -4260,6 +3666,7 @@ p {
 
     ${
       sourceList
+
         ? `
 
           <ul>
@@ -4274,10 +3681,11 @@ p {
 
           <p>
 
-            ${state.lang ===
-            'sl'
-              ? 'Viri niso navedeni.'
-              : 'No sources listed.'
+            ${
+              state.lang ===
+              'sl'
+                ? 'Viri niso navedeni.'
+                : 'No sources listed.'
             }
 
           </p>
@@ -4412,7 +3820,6 @@ function openSavedWork(
       index
     ];
 
-
   if (!work) {
     return;
   }
@@ -4420,32 +3827,28 @@ function openSavedWork(
 
   if (
     work.type ===
-    'poem'
+    'assistant'
   ) {
 
     state.creationType =
-      'poem';
+      'assistant';
 
-
-    state.poemPrompt =
+    state.assistantPrompt =
       work.prompt ||
       '';
 
-
-    state.generatedPoem =
+    state.generatedAssistant =
       work.content ||
       '';
 
-
-    state.poemPassages =
+    state.assistantPassages =
       Array.isArray(
         work.passages
       )
         ? work.passages
         : [];
 
-
-    state.poemError =
+    state.assistantError =
       '';
 
   }
@@ -4458,17 +3861,14 @@ function openSavedWork(
     state.creationType =
       'ask';
 
-
     state.askPrompt =
       work.prompt ||
       work.title ||
       '';
 
-
     state.generatedAnswer =
       work.content ||
       '';
-
 
     state.askPassages =
       Array.isArray(
@@ -4476,7 +3876,6 @@ function openSavedWork(
       )
         ? work.passages
         : [];
-
 
     state.askError =
       '';
@@ -4488,17 +3887,14 @@ function openSavedWork(
     state.creationType =
       'lecture';
 
-
     state.lectureTopic =
       work.prompt ||
       work.title ||
       '';
 
-
     state.generatedLecture =
       work.content ||
       '';
-
 
     state.lectureLength =
       String(
@@ -4506,14 +3902,12 @@ function openSavedWork(
         '20'
       );
 
-
     state.lecturePassages =
       Array.isArray(
         work.passages
       )
         ? work.passages
         : [];
-
 
     state.lectureError =
       '';
@@ -4524,20 +3918,17 @@ function openSavedWork(
   state.lectureGenerating =
     false;
 
-  state.poemGenerating =
+  state.assistantGenerating =
     false;
 
   state.askGenerating =
     false;
 
-
   state.screen =
     'result';
 
-
   save();
   render();
-
 
   window.scrollTo({
 
@@ -4571,12 +3962,10 @@ function removeSavedWork(
 
   }
 
-
   state.works.splice(
     index,
     1
   );
-
 
   save();
   render();
@@ -4595,60 +3984,45 @@ async function generate() {
   ) {
 
     toast(
-      t(
-        'chooseAtLeastOne'
-      )
+      t('chooseAtLeastOne')
     );
-
 
     return;
 
   }
-
 
   if (
     !state.lectureTopic.trim()
   ) {
 
     toast(
-      t(
-        'missingTopic'
-      )
+      t('missingTopic')
     );
-
 
     return;
 
   }
 
-
   state.creationType =
     'lecture';
-
 
   state.lectureGenerating =
     true;
 
-
   state.generatedLecture =
     '';
-
 
   state.lectureError =
     '';
 
-
   state.lecturePassages =
     [];
-
 
   state.screen =
     'result';
 
-
   save();
   render();
-
 
   try {
 
@@ -4660,47 +4034,37 @@ async function generate() {
 
     }
 
-
     const selected =
       findAiPassages(
         state.lectureTopic.trim()
       );
-
 
     if (
       !selected.length
     ) {
 
       throw new Error(
-        t(
-          'noRelevantPages'
-        )
+        t('noRelevantPages')
       );
 
     }
 
-
     state.lecturePassages =
       selected;
 
-
     save();
     render();
-
 
     const response =
       await fetch(
         AI_WORKER_URL,
         {
-
           method:
             'POST',
 
           headers: {
-
             'Content-Type':
               'application/json'
-
           },
 
           body:
@@ -4732,10 +4096,8 @@ async function generate() {
         }
       );
 
-
     const data =
       await response.json();
-
 
     if (
       !response.ok ||
@@ -4745,36 +4107,28 @@ async function generate() {
 
       throw new Error(
         data?.error ||
-        t(
-          'lectureError'
-        )
+        t('lectureError')
       );
 
     }
 
-
     state.generatedLecture =
       String(
         data.lecture ||
-        data.work ||
         data.content ||
         ''
       )
         .trim();
-
 
     if (
       !state.generatedLecture
     ) {
 
       throw new Error(
-        t(
-          'lectureError'
-        )
+        t('lectureError')
       );
 
     }
-
 
     saveGeneratedWork({
 
@@ -4804,29 +4158,14 @@ async function generate() {
 
     });
 
-
     state.lectureGenerating =
       false;
-
 
     state.screen =
       'result';
 
-
     save();
     render();
-
-
-    window.scrollTo({
-
-      top:
-        0,
-
-      behavior:
-        'smooth'
-
-    });
-
 
   } catch (error) {
 
@@ -4835,21 +4174,15 @@ async function generate() {
       error
     );
 
-
     state.lectureGenerating =
       false;
 
-
     state.lectureError =
       error?.message ||
-      t(
-        'lectureError'
-      );
-
+      t('lectureError');
 
     state.screen =
       'result';
-
 
     save();
     render();
@@ -4860,74 +4193,48 @@ async function generate() {
 
 
 /* =========================================================
-   AI POEM
+   AI ASSISTANT
    ========================================================= */
 
-async function generatePoem() {
+async function generateAssistant() {
 
   if (
-    !state.sources.length
+    !state.assistantPrompt.trim()
   ) {
 
     toast(
-      t(
-        'chooseAtLeastOne'
-      )
+      t('missingAssistant')
     );
-
 
     return;
 
   }
-
-
-  if (
-    !state.poemPrompt.trim()
-  ) {
-
-    toast(
-      t(
-        'missingPoem'
-      )
-    );
-
-
-    return;
-
-  }
-
 
   state.creationType =
-    'poem';
+    'assistant';
 
-
-  state.poemGenerating =
+  state.assistantGenerating =
     true;
 
-
-  state.generatedPoem =
+  state.generatedAssistant =
     '';
 
-
-  state.poemError =
+  state.assistantError =
     '';
 
-
-  state.poemPassages =
+  state.assistantPassages =
     [];
-
 
   state.screen =
     'result';
 
-
   save();
   render();
-
 
   try {
 
     if (
+      BOOKS.length &&
       !state.searchReady
     ) {
 
@@ -4935,57 +4242,47 @@ async function generatePoem() {
 
     }
 
-
-    const selected =
-      findAiPassages(
-        state.poemPrompt.trim()
-      );
-
+    let selected =
+      [];
 
     if (
-      !selected.length
+      state.searchReady &&
+      state.sources.length
     ) {
 
-      throw new Error(
-        t(
-          'noRelevantPages'
-        )
-      );
+      selected =
+        findAiPassages(
+          state.assistantPrompt.trim()
+        );
 
     }
 
-
-    state.poemPassages =
+    state.assistantPassages =
       selected;
-
 
     save();
     render();
-
 
     const response =
       await fetch(
         AI_WORKER_URL,
         {
-
           method:
             'POST',
 
           headers: {
-
             'Content-Type':
               'application/json'
-
           },
 
           body:
             JSON.stringify({
 
               type:
-                'poem',
+                'assistant',
 
               prompt:
-                state.poemPrompt.trim(),
+                state.assistantPrompt.trim(),
 
               language:
                 state.lang ===
@@ -5001,10 +4298,8 @@ async function generatePoem() {
         }
       );
 
-
     const data =
       await response.json();
-
 
     if (
       !response.ok ||
@@ -5014,47 +4309,39 @@ async function generatePoem() {
 
       throw new Error(
         data?.error ||
-        t(
-          'poemError'
-        )
+        t('assistantError')
       );
 
     }
 
-
-    state.generatedPoem =
+    state.generatedAssistant =
       String(
-        data.poem ||
-        data.work ||
+        data.answer ||
         data.content ||
         ''
       )
         .trim();
 
-
     if (
-      !state.generatedPoem
+      !state.generatedAssistant
     ) {
 
       throw new Error(
-        t(
-          'poemError'
-        )
+        t('assistantError')
       );
 
     }
 
-
     saveGeneratedWork({
 
       type:
-        'poem',
+        'assistant',
 
       title:
-        state.poemPrompt.trim(),
+        state.assistantPrompt.trim(),
 
       prompt:
-        state.poemPrompt.trim(),
+        state.assistantPrompt.trim(),
 
       language:
         state.lang ===
@@ -5063,59 +4350,38 @@ async function generatePoem() {
           : 'English',
 
       content:
-        state.generatedPoem,
+        state.generatedAssistant,
 
       passages:
-        state.poemPassages
+        state.assistantPassages
 
     });
 
-
-    state.poemGenerating =
+    state.assistantGenerating =
       false;
-
 
     state.screen =
       'result';
-
 
     save();
     render();
 
-
-    window.scrollTo({
-
-      top:
-        0,
-
-      behavior:
-        'smooth'
-
-    });
-
-
   } catch (error) {
 
     console.error(
-      'Poem generation error:',
+      'AI Assistant error:',
       error
     );
 
-
-    state.poemGenerating =
+    state.assistantGenerating =
       false;
 
-
-    state.poemError =
+    state.assistantError =
       error?.message ||
-      t(
-        'poemError'
-      );
-
+      t('assistantError');
 
     state.screen =
       'result';
-
 
     save();
     render();
@@ -5136,60 +4402,45 @@ async function generateAsk() {
   ) {
 
     toast(
-      t(
-        'chooseAtLeastOne'
-      )
+      t('chooseAtLeastOne')
     );
-
 
     return;
 
   }
-
 
   if (
     !state.askPrompt.trim()
   ) {
 
     toast(
-      t(
-        'missingQuestion'
-      )
+      t('missingQuestion')
     );
-
 
     return;
 
   }
 
-
   state.creationType =
     'ask';
-
 
   state.askGenerating =
     true;
 
-
   state.generatedAnswer =
     '';
-
 
   state.askError =
     '';
 
-
   state.askPassages =
     [];
-
 
   state.screen =
     'result';
 
-
   save();
   render();
-
 
   try {
 
@@ -5201,47 +4452,37 @@ async function generateAsk() {
 
     }
 
-
     const selected =
       findAiPassages(
         state.askPrompt.trim()
       );
-
 
     if (
       !selected.length
     ) {
 
       throw new Error(
-        t(
-          'noRelevantPages'
-        )
+        t('noRelevantPages')
       );
 
     }
 
-
     state.askPassages =
       selected;
 
-
     save();
     render();
-
 
     const response =
       await fetch(
         AI_WORKER_URL,
         {
-
           method:
             'POST',
 
           headers: {
-
             'Content-Type':
               'application/json'
-
           },
 
           body:
@@ -5267,10 +4508,8 @@ async function generateAsk() {
         }
       );
 
-
     const data =
       await response.json();
-
 
     if (
       !response.ok ||
@@ -5280,36 +4519,28 @@ async function generateAsk() {
 
       throw new Error(
         data?.error ||
-        t(
-          'answerError'
-        )
+        t('answerError')
       );
 
     }
 
-
     state.generatedAnswer =
       String(
         data.answer ||
-        data.work ||
         data.content ||
         ''
       )
         .trim();
-
 
     if (
       !state.generatedAnswer
     ) {
 
       throw new Error(
-        t(
-          'answerError'
-        )
+        t('answerError')
       );
 
     }
-
 
     saveGeneratedWork({
 
@@ -5336,29 +4567,14 @@ async function generateAsk() {
 
     });
 
-
     state.askGenerating =
       false;
-
 
     state.screen =
       'result';
 
-
     save();
     render();
-
-
-    window.scrollTo({
-
-      top:
-        0,
-
-      behavior:
-        'smooth'
-
-    });
-
 
   } catch (error) {
 
@@ -5367,21 +4583,15 @@ async function generateAsk() {
       error
     );
 
-
     state.askGenerating =
       false;
 
-
     state.askError =
       error?.message ||
-      t(
-        'answerError'
-      );
-
+      t('answerError');
 
     state.screen =
       'result';
-
 
     save();
     render();
@@ -5392,14 +4602,13 @@ async function generateAsk() {
 
 
 /* =========================================================
-   CREATE
+   CREATE SCREEN
    ========================================================= */
 
 function create() {
 
   const selectedCount =
     state.sources.length;
-
 
   if (
     state.lectureGenerating
@@ -5410,7 +4619,6 @@ function create() {
       <div class="working">
 
         <div class="dot"></div>
-
 
         <h2
           style="
@@ -5428,7 +4636,6 @@ function create() {
 
         </h2>
 
-
         <div class="muted">
 
           ${escapeHtml(
@@ -5443,9 +4650,8 @@ function create() {
 
   }
 
-
   if (
-    state.poemGenerating
+    state.assistantGenerating
   ) {
 
     return layout(`
@@ -5454,28 +4660,21 @@ function create() {
 
         <div class="dot"></div>
 
-
         <h2
           style="
             margin-top:20px
           ">
 
-          ${
-            state.lang ===
-            'sl'
-
-              ? 'AI pripravlja pesem…'
-
-              : 'AI is preparing your poem…'
-          }
+          ${t(
+            'assistantPreparing'
+          )}
 
         </h2>
-
 
         <div class="muted">
 
           ${escapeHtml(
-            state.poemPrompt
+            state.assistantPrompt
           )}
 
         </div>
@@ -5485,7 +4684,6 @@ function create() {
     `);
 
   }
-
 
   if (
     state.askGenerating
@@ -5497,7 +4695,6 @@ function create() {
 
         <div class="dot"></div>
 
-
         <h2
           style="
             margin-top:20px
@@ -5508,7 +4705,6 @@ function create() {
           )}
 
         </h2>
-
 
         <div class="muted">
 
@@ -5524,7 +4720,6 @@ function create() {
 
   }
 
-
   return layout(`
 
     <div class="eyebrow">
@@ -5533,13 +4728,11 @@ function create() {
 
     </div>
 
-
     <h1>
 
-      ${t('create')}
+      ${t('createWork')}
 
     </h1>
-
 
     ${
       BOOKS.length
@@ -5567,7 +4760,6 @@ function create() {
 
               </h3>
 
-
               <span class="muted">
 
                 ${selectedCount}
@@ -5579,7 +4771,6 @@ function create() {
               </span>
 
             </div>
-
 
             <div
               style="
@@ -5597,7 +4788,6 @@ function create() {
                     state.sources.includes(
                       index
                     );
-
 
                   return `
 
@@ -5622,11 +4812,7 @@ function create() {
                         )
                       ">
 
-                      <span
-                        style="
-                          display:block;
-                          min-width:0
-                        ">
+                      <span>
 
                         <strong>
 
@@ -5638,11 +4824,9 @@ function create() {
 
                       </span>
 
-
                       <span
                         style="
-                          font-size:20px;
-                          flex:0 0 auto
+                          font-size:20px
                         ">
 
                         ${
@@ -5672,9 +4856,7 @@ function create() {
 
             <div class="muted">
 
-              ${t(
-                'noBooks'
-              )}
+              ${t('noBooks')}
 
             </div>
 
@@ -5684,6 +4866,80 @@ function create() {
     }
 
 
+    <div
+      class="card"
+      style="
+        margin-top:24px
+      ">
+
+      <h2
+        style="
+          margin:0
+        ">
+
+        ${t('aiAssistant')}
+
+      </h2>
+
+      <p
+        class="muted"
+        style="
+          margin-top:8px;
+          margin-bottom:18px
+        ">
+
+        ${t(
+          'assistantDescription'
+        )}
+
+      </p>
+
+      <h3>
+
+        ${t(
+          'assistantPrompt'
+        )}
+
+      </h3>
+
+      <textarea
+        class="textarea"
+        style="
+          margin-top:10px;
+          min-height:220px
+        "
+        oninput="
+          setAssistantPrompt(
+            this.value
+          )
+        "
+        placeholder="${t(
+          'assistantPlaceholder'
+        )}">${escapeHtml(
+          state.assistantPrompt
+        )}</textarea>
+
+      <button
+        type="button"
+        class="primary"
+        style="
+          margin-top:16px
+        "
+        onclick="
+          generateAssistant()
+        ">
+
+        ✦
+
+        ${t(
+          'assistantButton'
+        )}
+
+      </button>
+
+    </div>
+
+
     ${
       BOOKS.length
         ? `
@@ -5691,7 +4947,7 @@ function create() {
           <div
             class="card"
             style="
-              margin-top:24px
+              margin-top:32px
             ">
 
             <h2
@@ -5705,7 +4961,6 @@ function create() {
 
             </h2>
 
-
             <p
               class="muted"
               style="
@@ -5713,17 +4968,11 @@ function create() {
                 margin-bottom:18px
               ">
 
-              ${
-                state.lang ===
-                'sl'
-
-                  ? 'Ustvari predavanje iz izbranih knjig.'
-
-                  : 'Create a lecture from the selected books.'
-              }
+              ${t(
+                'lectureDescription'
+              )}
 
             </p>
-
 
             <h3>
 
@@ -5732,7 +4981,6 @@ function create() {
               )}
 
             </h3>
-
 
             <textarea
               class="textarea"
@@ -5751,7 +4999,6 @@ function create() {
                 state.lectureTopic
               )}</textarea>
 
-
             <h3>
 
               ${t(
@@ -5759,7 +5006,6 @@ function create() {
               )}
 
             </h3>
-
 
             <div
               class="formgrid"
@@ -5825,7 +5071,6 @@ function create() {
 
             </div>
 
-
             <h3>
 
               ${t(
@@ -5833,7 +5078,6 @@ function create() {
               )}
 
             </h3>
-
 
             <div
               class="chips"
@@ -5857,7 +5101,6 @@ function create() {
 
               </button>
 
-
               <button
                 type="button"
                 class="chip ${
@@ -5875,7 +5118,6 @@ function create() {
               </button>
 
             </div>
-
 
             <button
               type="button"
@@ -5897,91 +5139,14 @@ function create() {
 
           </div>
 
-
-          <div
-            class="section card"
-            style="
-              margin-top:32px
-            ">
-
-            <h2
-              style="
-                margin:0
-              ">
-
-              ${t(
-                'aiPoem'
-              )}
-
-            </h2>
+        `
+        : ''
+    }
 
 
-            <p
-              class="muted"
-              style="
-                margin-top:8px;
-                margin-bottom:18px
-              ">
-
-              ${
-                state.lang ===
-                'sl'
-
-                  ? 'Ustvari izvirno pesem na podlagi vsebine izbranih knjig.'
-
-                  : 'Create an original poem based on the selected books.'
-              }
-
-            </p>
-
-
-            <h3>
-
-              ${t(
-                'poemPrompt'
-              )}
-
-            </h3>
-
-
-            <textarea
-              class="textarea"
-              style="
-                margin-top:10px;
-                min-height:190px
-              "
-              oninput="
-                setPoemPrompt(
-                  this.value
-                )
-              "
-              placeholder="${t(
-                'poemPromptPlaceholder'
-              )}">${escapeHtml(
-                state.poemPrompt
-              )}</textarea>
-
-
-            <button
-              type="button"
-              class="primary"
-              style="
-                margin-top:16px
-              "
-              onclick="
-                generatePoem()
-              ">
-
-              ✦
-
-              ${t(
-                'createPoem'
-              )}
-
-            </button>
-
-          </div>
-
+    ${
+      BOOKS.length
+        ? `
 
           <div
             class="section card"
@@ -6000,7 +5165,6 @@ function create() {
 
             </h2>
 
-
             <p
               class="muted"
               style="
@@ -6013,7 +5177,6 @@ function create() {
               )}
 
             </p>
-
 
             <div
               class="muted"
@@ -6033,7 +5196,6 @@ function create() {
 
             </div>
 
-
             <h3>
 
               ${t(
@@ -6041,7 +5203,6 @@ function create() {
               )}
 
             </h3>
-
 
             <textarea
               class="textarea"
@@ -6059,7 +5220,6 @@ function create() {
               )}">${escapeHtml(
                 state.askPrompt
               )}</textarea>
-
 
             <button
               type="button"
@@ -6094,7 +5254,7 @@ function create() {
    RESULT FORMATTING
    ========================================================= */
 
-function formatLecture(
+function formatText(
   text
 ) {
 
@@ -6107,14 +5267,12 @@ function formatLecture(
         /\r?\n/
       );
 
-
   return lines
     .map(
       line => {
 
         const clean =
           line.trim();
-
 
         if (!clean) {
 
@@ -6128,12 +5286,10 @@ function formatLecture(
 
         }
 
-
         const escaped =
           escapeHtml(
             clean
           );
-
 
         if (
           escaped.startsWith(
@@ -6142,7 +5298,6 @@ function formatLecture(
         ) {
 
           return `
-
             <h4
               style="
                 margin-top:24px
@@ -6153,11 +5308,9 @@ function formatLecture(
               )}
 
             </h4>
-
           `;
 
         }
-
 
         if (
           escaped.startsWith(
@@ -6166,7 +5319,6 @@ function formatLecture(
         ) {
 
           return `
-
             <h3
               style="
                 margin-top:28px
@@ -6177,11 +5329,9 @@ function formatLecture(
               )}
 
             </h3>
-
           `;
 
         }
-
 
         if (
           escaped.startsWith(
@@ -6190,7 +5340,6 @@ function formatLecture(
         ) {
 
           return `
-
             <h2
               style="
                 margin-top:28px
@@ -6201,11 +5350,9 @@ function formatLecture(
               )}
 
             </h2>
-
           `;
 
         }
-
 
         const formatted =
           escaped.replace(
@@ -6213,15 +5360,12 @@ function formatLecture(
             '<strong>$1</strong>'
           );
 
-
         return `
-
           <p class="english">
 
             ${formatted}
 
           </p>
-
         `;
 
       }
@@ -6232,152 +5376,82 @@ function formatLecture(
 
 
 /* =========================================================
-   POEM FORMATTING
+   RESULT SOURCES
    ========================================================= */
 
-function formatPoem(
-  text
+function sourceBlock(
+  passages
 ) {
 
-  const lines =
-    String(
-      text ||
-      ''
-    )
-      .split(
-        /\r?\n/
-      );
+  if (
+    !Array.isArray(
+      passages
+    ) ||
+    !passages.length
+  ) {
 
+    return '';
+
+  }
 
   return `
 
-    <div
-      style="
-        max-width:850px;
-        margin:0 auto;
-        text-align:left
-      ">
+    <div class="card section">
 
-      ${
-        lines
-          .map(
-            line => {
+      <h3>
 
-              const clean =
-                line.trim();
+        ${t(
+          'sources'
+        )}
 
+      </h3>
 
-              if (!clean) {
+      <div
+        class="muted"
+        style="
+          margin-top:10px;
+          line-height:1.7
+        ">
 
-                return `
-                  <div
-                    style="
-                      height:10px
-                    ">
-                  </div>
-                `;
+        ${
+          passages
+            .map(
+              (
+                passage,
+                index
+              ) =>
+                `${index + 1}. ${
+                  escapeHtml(
+                    passage.bookTitle ||
+                    ''
+                  )
+                }${
+                  passage.author
+                    ? ` — ${escapeHtml(
+                        passage.author
+                      )}`
+                    : ''
+                }${
+                  passage.page
+                    ? ` · ${
+                        state.lang ===
+                        'sl'
+                          ? 'stran'
+                          : 'page'
+                      } ${
+                        escapeHtml(
+                          passage.page
+                        )
+                      }`
+                    : ''
+                }`
+            )
+            .join(
+              '<br>'
+            )
+        }
 
-              }
-
-
-              const escaped =
-                escapeHtml(
-                  clean
-                );
-
-
-              if (
-                escaped.startsWith(
-                  '### '
-                )
-              ) {
-
-                return `
-                  <h4
-                    style="
-                      margin-top:24px
-                    ">
-
-                    ${escaped.slice(
-                      4
-                    )}
-
-                  </h4>
-                `;
-
-              }
-
-
-              if (
-                escaped.startsWith(
-                  '## '
-                )
-              ) {
-
-                return `
-                  <h3
-                    style="
-                      margin-top:28px
-                    ">
-
-                    ${escaped.slice(
-                      3
-                    )}
-
-                  </h3>
-                `;
-
-              }
-
-
-              if (
-                escaped.startsWith(
-                  '# '
-                )
-              ) {
-
-                return `
-                  <h2
-                    style="
-                      margin-top:28px
-                    ">
-
-                    ${escaped.slice(
-                      2
-                    )}
-
-                  </h2>
-                `;
-
-              }
-
-
-              const formatted =
-                escaped.replace(
-                  /\*\*(.*?)\*\*/g,
-                  '<strong>$1</strong>'
-                );
-
-
-              return `
-
-                <div
-                  style="
-                    font-size:17px;
-                    line-height:1.9;
-                    margin:0 0 6px
-                  ">
-
-                  ${formatted}
-
-                </div>
-
-              `;
-
-            }
-          )
-          .join('')
-      }
+      </div>
 
     </div>
 
@@ -6387,7 +5461,7 @@ function formatPoem(
 
 
 /* =========================================================
-   RESULT
+   RESULT SCREEN
    ========================================================= */
 
 function result() {
@@ -6402,11 +5476,7 @@ function result() {
 
         <div class="dot"></div>
 
-
-        <h2
-          style="
-            margin-top:20px
-          ">
+        <h2>
 
           ${
             state.lang ===
@@ -6418,7 +5488,6 @@ function result() {
           }
 
         </h2>
-
 
         <div class="muted">
 
@@ -6436,7 +5505,7 @@ function result() {
 
 
   if (
-    state.poemGenerating
+    state.assistantGenerating
   ) {
 
     return layout(`
@@ -6445,28 +5514,18 @@ function result() {
 
         <div class="dot"></div>
 
+        <h2>
 
-        <h2
-          style="
-            margin-top:20px
-          ">
-
-          ${
-            state.lang ===
-            'sl'
-
-              ? 'AI pripravlja pesem…'
-
-              : 'AI is preparing your poem…'
-          }
+          ${t(
+            'assistantPreparing'
+          )}
 
         </h2>
-
 
         <div class="muted">
 
           ${escapeHtml(
-            state.poemPrompt
+            state.assistantPrompt
           )}
 
         </div>
@@ -6488,18 +5547,13 @@ function result() {
 
         <div class="dot"></div>
 
-
-        <h2
-          style="
-            margin-top:20px
-          ">
+        <h2>
 
           ${t(
             'answerPreparing'
           )}
 
         </h2>
-
 
         <div class="muted">
 
@@ -6518,11 +5572,11 @@ function result() {
 
   if (
     state.creationType ===
-    'poem'
+    'assistant'
   ) {
 
     if (
-      state.poemError
+      state.assistantError
     ) {
 
       return layout(`
@@ -6540,13 +5594,12 @@ function result() {
 
           </button>
 
-
           <div style="flex:1">
 
             <strong>
 
               ${t(
-                'aiPoem'
+                'aiAssistant'
               )}
 
             </strong>
@@ -6555,40 +5608,37 @@ function result() {
 
         </div>
 
-
         <div class="section card">
 
           <h3>
 
             ${t(
-              'poemError'
+              'assistantError'
             )}
 
           </h3>
 
-
           <p class="muted">
 
             ${escapeHtml(
-              state.poemError
+              state.assistantError
             )}
 
           </p>
 
         </div>
 
-
         <button
           type="button"
           class="primary"
           onclick="
-            generatePoem()
+            generateAssistant()
           ">
 
           ✦
 
           ${t(
-            'createPoem'
+            'assistantButton'
           )}
 
         </button>
@@ -6596,7 +5646,6 @@ function result() {
       `);
 
     }
-
 
     return layout(`
 
@@ -6613,32 +5662,19 @@ function result() {
 
         </button>
 
-
         <div style="flex:1">
 
           <strong>
 
             ${t(
-              'aiPoem'
+              'aiAssistant'
             )}
 
           </strong>
 
-
-          <div class="muted">
-
-            ${state.sources.length}
-
-            ${t(
-              'selectedBooks'
-            )}
-
-          </div>
-
         </div>
 
       </div>
-
 
       <div
         class="eyebrow"
@@ -6647,128 +5683,58 @@ function result() {
         ">
 
         ${t(
-          'generatedWork'
+          'aiAssistant'
         )}
 
       </div>
-
 
       <h1>
 
         ${t(
-          'aiPoem'
+          'aiAssistant'
         )}
 
       </h1>
 
-
       <div
         class="muted"
         style="
-          margin-bottom:22px
+          margin-bottom:22px;
+          line-height:1.6
         ">
 
         ${escapeHtml(
-          state.poemPrompt
+          state.assistantPrompt
         )}
 
       </div>
 
-
       <div class="section">
 
         ${
-          state.generatedPoem
-            ? formatPoem(
-                state.generatedPoem
+          state.generatedAssistant
+            ? formatText(
+                state.generatedAssistant
               )
+
             : `
+
               <div class="muted">
 
-                ${
-                  state.lang ===
-                  'sl'
-
-                    ? 'Pesem še ni ustvarjena.'
-
-                    : 'The poem has not been generated yet.'
-                }
+                ${t(
+                  'assistantNotCreated'
+                )}
 
               </div>
+
             `
         }
 
       </div>
 
-
-      ${
-        state.poemPassages.length
-          ? `
-
-            <div class="card section">
-
-              <h3>
-
-                ${t(
-                  'sources'
-                )}
-
-              </h3>
-
-
-              <div
-                class="muted"
-                style="
-                  margin-top:10px;
-                  line-height:1.7
-                ">
-
-                ${
-                  state.poemPassages
-                    .map(
-                      (
-                        passage,
-                        index
-                      ) =>
-                        `${index + 1}. ${
-                          escapeHtml(
-                            passage.bookTitle ||
-                            ''
-                          )
-                        }${
-                          passage.author
-                            ? ` — ${escapeHtml(
-                                passage.author
-                              )}`
-                            : ''
-                        }${
-                          passage.page
-                            ? ` · ${
-                                state.lang ===
-                                'sl'
-                                  ? 'stran'
-                                  : 'page'
-                              } ${
-                                escapeHtml(
-                                  passage.page
-                                )
-                              }`
-                            : ''
-                        }`
-                    )
-                    .join(
-                      '<br>'
-                    )
-                }
-
-              </div>
-
-            </div>
-
-          `
-          : ''
-      }
-
+      ${sourceBlock(
+        state.assistantPassages
+      )}
 
       <button
         type="button"
@@ -6814,7 +5780,6 @@ function result() {
 
           </button>
 
-
           <div style="flex:1">
 
             <strong>
@@ -6829,7 +5794,6 @@ function result() {
 
         </div>
 
-
         <div class="section card">
 
           <h3>
@@ -6840,7 +5804,6 @@ function result() {
 
           </h3>
 
-
           <p class="muted">
 
             ${escapeHtml(
@@ -6850,7 +5813,6 @@ function result() {
           </p>
 
         </div>
-
 
         <button
           type="button"
@@ -6871,7 +5833,6 @@ function result() {
 
     }
 
-
     return layout(`
 
       <div class="top">
@@ -6887,7 +5848,6 @@ function result() {
 
         </button>
 
-
         <div style="flex:1">
 
           <strong>
@@ -6897,7 +5857,6 @@ function result() {
             )}
 
           </strong>
-
 
           <div class="muted">
 
@@ -6913,7 +5872,6 @@ function result() {
 
       </div>
 
-
       <div
         class="eyebrow"
         style="
@@ -6926,7 +5884,6 @@ function result() {
 
       </div>
 
-
       <h1>
 
         ${t(
@@ -6935,12 +5892,10 @@ function result() {
 
       </h1>
 
-
       <div
         class="muted"
         style="
-          margin-bottom:22px;
-          line-height:1.6
+          margin-bottom:22px
         ">
 
         ${escapeHtml(
@@ -6949,13 +5904,12 @@ function result() {
 
       </div>
 
-
       <div class="section">
 
         ${
           state.generatedAnswer
 
-            ? formatLecture(
+            ? formatText(
                 state.generatedAnswer
               )
 
@@ -6974,75 +5928,9 @@ function result() {
 
       </div>
 
-
-      ${
-        state.askPassages.length
-          ? `
-
-            <div class="card section">
-
-              <h3>
-
-                ${t(
-                  'sources'
-                )}
-
-              </h3>
-
-
-              <div
-                class="muted"
-                style="
-                  margin-top:10px;
-                  line-height:1.7
-                ">
-
-                ${
-                  state.askPassages
-                    .map(
-                      (
-                        passage,
-                        index
-                      ) =>
-                        `${index + 1}. ${
-                          escapeHtml(
-                            passage.bookTitle ||
-                            ''
-                          )
-                        }${
-                          passage.author
-                            ? ` — ${escapeHtml(
-                                passage.author
-                              )}`
-                            : ''
-                        }${
-                          passage.page
-                            ? ` · ${
-                                state.lang ===
-                                'sl'
-                                  ? 'stran'
-                                  : 'page'
-                              } ${
-                                escapeHtml(
-                                  passage.page
-                                )
-                              }`
-                            : ''
-                        }`
-                    )
-                    .join(
-                      '<br>'
-                    )
-                }
-
-              </div>
-
-            </div>
-
-          `
-          : ''
-      }
-
+      ${sourceBlock(
+        state.askPassages
+      )}
 
       <button
         type="button"
@@ -7083,7 +5971,6 @@ function result() {
 
         </button>
 
-
         <div style="flex:1">
 
           <strong>
@@ -7098,7 +5985,6 @@ function result() {
 
       </div>
 
-
       <div class="section card">
 
         <h3>
@@ -7109,7 +5995,6 @@ function result() {
 
         </h3>
 
-
         <p class="muted">
 
           ${escapeHtml(
@@ -7119,7 +6004,6 @@ function result() {
         </p>
 
       </div>
-
 
       <button
         type="button"
@@ -7156,7 +6040,6 @@ function result() {
 
       </button>
 
-
       <div style="flex:1">
 
         <strong>
@@ -7166,7 +6049,6 @@ function result() {
           )}
 
         </strong>
-
 
         <div class="muted">
 
@@ -7188,7 +6070,6 @@ function result() {
 
     </div>
 
-
     <div
       class="eyebrow"
       style="
@@ -7196,11 +6077,10 @@ function result() {
       ">
 
       ${t(
-        'generatedWork'
+        'aiLecture'
       )}
 
     </div>
-
 
     <h1>
 
@@ -7210,16 +6090,13 @@ function result() {
 
     </h1>
 
-
     <div class="section">
 
       ${
         state.generatedLecture
-
-          ? formatLecture(
+          ? formatText(
               state.generatedLecture
             )
-
           : `
 
             <div class="muted">
@@ -7240,75 +6117,9 @@ function result() {
 
     </div>
 
-
-    ${
-      state.lecturePassages.length
-        ? `
-
-          <div class="card section">
-
-            <h3>
-
-              ${t(
-                'sources'
-              )}
-
-            </h3>
-
-
-            <div
-              class="muted"
-              style="
-                margin-top:10px;
-                line-height:1.7
-              ">
-
-              ${
-                state.lecturePassages
-                  .map(
-                    (
-                      passage,
-                      index
-                    ) =>
-                      `${index + 1}. ${
-                        escapeHtml(
-                          passage.bookTitle ||
-                          ''
-                        )
-                      }${
-                        passage.author
-                          ? ` — ${escapeHtml(
-                              passage.author
-                            )}`
-                          : ''
-                      }${
-                        passage.page
-                          ? ` · ${
-                              state.lang ===
-                              'sl'
-                                ? 'stran'
-                                : 'page'
-                            } ${
-                              escapeHtml(
-                                passage.page
-                              )
-                            }`
-                          : ''
-                      }`
-                  )
-                  .join(
-                    '<br>'
-                  )
-              }
-
-            </div>
-
-          </div>
-
-        `
-        : ''
-    }
-
+    ${sourceBlock(
+      state.lecturePassages
+    )}
 
     <button
       type="button"
@@ -7339,17 +6150,13 @@ function saved() {
   const works =
     state.works;
 
-
   return layout(`
 
     <h2>
 
-      ${t(
-        'saved'
-      )}
+      ${t('saved')}
 
     </h2>
-
 
     <div class="section">
 
@@ -7369,7 +6176,6 @@ function saved() {
 
         </h3>
 
-
         <span class="muted">
 
           ${works.length}
@@ -7377,7 +6183,6 @@ function saved() {
         </span>
 
       </div>
-
 
       ${
         works.length
@@ -7389,32 +6194,37 @@ function saved() {
                   index
                 ) => {
 
-                  const isPoem =
+                  const typeLabel =
                     work.type ===
-                    'poem';
+                    'assistant'
 
+                      ? t(
+                          'assistantWork'
+                        )
 
-                  const isAsk =
+                      : work.type ===
+                        'ask'
+
+                        ? t(
+                            'askWork'
+                          )
+
+                        : t(
+                            'lectureWork'
+                          );
+
+                  const marker =
                     work.type ===
-                    'ask';
-
+                    'assistant'
+                      ? 'AI'
+                      : work.type ===
+                        'ask'
+                        ? 'Q'
+                        : 'A';
 
                   const title =
                     work.title ||
-                    (
-                      isPoem
-                        ? t(
-                            'aiPoem'
-                          )
-                        : isAsk
-                          ? t(
-                              'askBooks'
-                            )
-                          : t(
-                              'aiLecture'
-                            )
-                    );
-
+                    typeLabel;
 
                   const preview =
                     String(
@@ -7427,7 +6237,6 @@ function saved() {
                       )
                       .trim();
 
-
                   const shortPreview =
                     preview.length >
                     170
@@ -7439,7 +6248,6 @@ function saved() {
                           '…'
                         )
                       : preview;
-
 
                   return `
 
@@ -7457,16 +6265,9 @@ function saved() {
 
                       <div class="num">
 
-                        ${
-                          isPoem
-                            ? 'P'
-                            : isAsk
-                              ? 'Q'
-                              : 'A'
-                        }
+                        ${marker}
 
                       </div>
-
 
                       <div class="grow">
 
@@ -7481,29 +6282,15 @@ function saved() {
 
                         </div>
 
-
                         <div
                           class="muted"
                           style="
                             margin-top:4px
                           ">
 
-                          ${
-                            isPoem
-                              ? t(
-                                  'poemWork'
-                                )
-                              : isAsk
-                                ? t(
-                                    'askWork'
-                                  )
-                                : t(
-                                    'lectureWork'
-                                  )
-                          }
+                          ${typeLabel}
 
                         </div>
-
 
                         ${
                           shortPreview
@@ -7524,7 +6311,6 @@ function saved() {
                             `
                             : ''
                         }
-
 
                         <div
                           class="muted"
@@ -7547,7 +6333,6 @@ function saved() {
 
                         </div>
 
-
                         <div
                           style="
                             display:flex;
@@ -7565,7 +6350,6 @@ function saved() {
                               openSavedWork(
                                 ${index}
                               );
-
                             ">
 
                             ${t(
@@ -7573,7 +6357,6 @@ function saved() {
                             )}
 
                           </button>
-
 
                           <button
                             type="button"
@@ -7584,7 +6367,6 @@ function saved() {
                               downloadSavedWork(
                                 ${index}
                               );
-
                             ">
 
                             ${t(
@@ -7592,7 +6374,6 @@ function saved() {
                             )}
 
                           </button>
-
 
                           <button
                             type="button"
@@ -7603,7 +6384,6 @@ function saved() {
                               removeSavedWork(
                                 ${index}
                               );
-
                             ">
 
                             ${t(
@@ -7659,11 +6439,9 @@ function render() {
       'app'
     );
 
-
   if (!root) {
     return;
   }
-
 
   root.innerHTML =
 
@@ -7733,8 +6511,8 @@ window.openSearchResult =
 window.generate =
   generate;
 
-window.generatePoem =
-  generatePoem;
+window.generateAssistant =
+  generateAssistant;
 
 window.generateAsk =
   generateAsk;
@@ -7748,8 +6526,8 @@ window.setLectureTopic =
 window.setLectureLength =
   setLectureLength;
 
-window.setPoemPrompt =
-  setPoemPrompt;
+window.setAssistantPrompt =
+  setAssistantPrompt;
 
 window.setAskPrompt =
   setAskPrompt;
