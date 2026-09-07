@@ -40,6 +40,9 @@ const I18N = {
 
   en: {
 
+    appTitle:
+      'AI Book Library',
+
     library: 'Library',
     search: 'Search',
     create: 'Create',
@@ -241,6 +244,9 @@ const I18N = {
 
 
   sl: {
+
+    appTitle:
+      'UI Knjižnica',
 
     library: 'Knjižnica',
     search: 'Iskanje',
@@ -1224,7 +1230,7 @@ function library() {
 
     <h1>
 
-      AI Book Library
+      ${t('appTitle')}
 
     </h1>
 
