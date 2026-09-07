@@ -156,6 +156,36 @@ const I18N = {
     assistantError:
       'Could not create the AI answer.',
 
+    articleWriting:
+      'AI Article Writing',
+
+    articleDescription:
+      'Create a very long, detailed article suitable for newspapers, magazines, journals, websites and other publications.',
+
+    articleTopic:
+      'Article topic',
+
+    articlePlaceholder:
+      'Describe the topic, idea, event, person, issue or theme you want the article to cover in depth…',
+
+    articleLength:
+      'Article length',
+
+    articleMinimum:
+      '10,000 words or more',
+
+    createArticle:
+      'Write article',
+
+    articlePreparing:
+      'AI is writing your long article…',
+
+    articleNotCreated:
+      'The article has not been created yet.',
+
+    articleError:
+      'Could not create the article.',
+
     askBooks:
       'Ask the Books',
 
@@ -198,6 +228,9 @@ const I18N = {
     assistantWork:
       'AI Assistant',
 
+    articleWork:
+      'Article',
+
     askWork:
       'Book question',
 
@@ -228,6 +261,9 @@ const I18N = {
     missingAssistant:
       'Please enter a message.',
 
+    missingArticle:
+      'Please enter an article topic.',
+
     missingQuestion:
       'Please enter a question.',
 
@@ -238,7 +274,10 @@ const I18N = {
       'Could not create the answer.',
 
     lectureError:
-      'Could not create the lecture.'
+      'Could not create the lecture.',
+
+    articleErrorGeneric:
+      'Could not create the article.'
 
   },
 
@@ -361,6 +400,36 @@ const I18N = {
     assistantError:
       'AI odgovora ni bilo mogoče ustvariti.',
 
+    articleWriting:
+      'AI pisanje članka',
+
+    articleDescription:
+      'Ustvari zelo dolg in poglobljen članek za časopis, revijo, strokovno publikacijo, spletni portal, glasilo ali drugo publikacijo.',
+
+    articleTopic:
+      'Tema članka',
+
+    articlePlaceholder:
+      'Opiši temo, idejo, dogodek, osebo, vprašanje ali področje, o katerem želiš zelo poglobljen članek…',
+
+    articleLength:
+      'Dolžina članka',
+
+    articleMinimum:
+      '10.000 besed ali več',
+
+    createArticle:
+      'Napiši članek',
+
+    articlePreparing:
+      'AI piše dolg članek…',
+
+    articleNotCreated:
+      'Članek še ni ustvarjen.',
+
+    articleError:
+      'Članka ni bilo mogoče ustvariti.',
+
     askBooks:
       'Vprašaj knjige',
 
@@ -403,6 +472,9 @@ const I18N = {
     assistantWork:
       'AI pomočnik',
 
+    articleWork:
+      'Članek',
+
     askWork:
       'Vprašanje knjig',
 
@@ -433,6 +505,9 @@ const I18N = {
     missingAssistant:
       'Najprej napiši sporočilo.',
 
+    missingArticle:
+      'Najprej vpiši temo članka.',
+
     missingQuestion:
       'Najprej napiši vprašanje.',
 
@@ -443,7 +518,10 @@ const I18N = {
       'Odgovora ni bilo mogoče ustvariti.',
 
     lectureError:
-      'Predavanja ni bilo mogoče ustvariti.'
+      'Predavanja ni bilo mogoče ustvariti.',
+
+    articleErrorGeneric:
+      'Članka ni bilo mogoče ustvariti.'
 
   }
 
@@ -520,6 +598,21 @@ let state = {
     '',
 
   assistantPassages:
+    [],
+
+  articleTopic:
+    '',
+
+  articleGenerating:
+    false,
+
+  generatedArticle:
+    '',
+
+  articleError:
+    '',
+
+  articlePassages:
     [],
 
   askPrompt:
@@ -611,6 +704,10 @@ if (!Array.isArray(state.assistantPassages)) {
   state.assistantPassages = [];
 }
 
+if (!Array.isArray(state.articlePassages)) {
+  state.articlePassages = [];
+}
+
 if (!Array.isArray(state.askPassages)) {
   state.askPassages = [];
 }
@@ -624,6 +721,7 @@ state.lectureLength =
 if (
   state.creationType !== 'lecture' &&
   state.creationType !== 'assistant' &&
+  state.creationType !== 'article' &&
   state.creationType !== 'ask'
 ) {
 
@@ -893,6 +991,18 @@ function save() {
 
       assistantPassages:
         state.assistantPassages,
+
+      articleTopic:
+        state.articleTopic,
+
+      generatedArticle:
+        state.generatedArticle,
+
+      articleError:
+        state.articleError,
+
+      articlePassages:
+        state.articlePassages,
 
       askPrompt:
         state.askPrompt,
@@ -2794,6 +2904,15 @@ function setAssistantPrompt(value) {
 
 }
 
+function setArticleTopic(value) {
+
+  state.articleTopic =
+    value;
+
+  save();
+
+}
+
 function setAskPrompt(value) {
 
   state.askPrompt =
@@ -3080,15 +3199,22 @@ function saveGeneratedWork(
             )
 
           : work.type ===
-            'ask'
+            'article'
 
             ? t(
-                'askBooks'
+                'articleWriting'
               )
 
-            : t(
-                'aiLecture'
-              )
+            : work.type ===
+              'ask'
+
+              ? t(
+                  'askBooks'
+                )
+
+              : t(
+                  'aiLecture'
+                )
       ),
 
     prompt:
@@ -3309,21 +3435,31 @@ function downloadSavedWork(
         )
 
       : work.type ===
-        'ask'
+        'article'
 
         ? (
             state.lang ===
             'sl'
-              ? 'Vprašanje knjig'
-              : 'Book question'
+              ? 'AI pisanje članka'
+              : 'AI Article Writing'
           )
 
-        : (
-            state.lang ===
-            'sl'
-              ? 'AI predavanje'
-              : 'AI Lecture'
-          );
+        : work.type ===
+          'ask'
+
+          ? (
+              state.lang ===
+              'sl'
+                ? 'Vprašanje knjig'
+                : 'Book question'
+            )
+
+          : (
+              state.lang ===
+              'sl'
+                ? 'AI predavanje'
+                : 'AI Lecture'
+            );
 
   const title =
     String(
@@ -3861,6 +3997,35 @@ function openSavedWork(
 
   else if (
     work.type ===
+    'article'
+  ) {
+
+    state.creationType =
+      'article';
+
+    state.articleTopic =
+      work.prompt ||
+      work.title ||
+      '';
+
+    state.generatedArticle =
+      work.content ||
+      '';
+
+    state.articlePassages =
+      Array.isArray(
+        work.passages
+      )
+        ? work.passages
+        : [];
+
+    state.articleError =
+      '';
+
+  }
+
+  else if (
+    work.type ===
     'ask'
   ) {
 
@@ -3925,6 +4090,9 @@ function openSavedWork(
     false;
 
   state.assistantGenerating =
+    false;
+
+  state.articleGenerating =
     false;
 
   state.askGenerating =
@@ -4398,6 +4566,215 @@ async function generateAssistant() {
 
 
 /* =========================================================
+   AI ARTICLE WRITING
+   ========================================================= */
+
+async function generateArticle() {
+
+  if (
+    !state.articleTopic.trim()
+  ) {
+
+    toast(
+      t('missingArticle')
+    );
+
+    return;
+
+  }
+
+  state.creationType =
+    'article';
+
+  state.articleGenerating =
+    true;
+
+  state.generatedArticle =
+    '';
+
+  state.articleError =
+    '';
+
+  state.articlePassages =
+    [];
+
+  state.screen =
+    'result';
+
+  save();
+  render();
+
+  try {
+
+    if (
+      BOOKS.length &&
+      !state.searchReady
+    ) {
+
+      await buildSearchIndex();
+
+    }
+
+    let selected =
+      [];
+
+    if (
+      state.searchReady &&
+      state.sources.length
+    ) {
+
+      selected =
+        findAiPassages(
+          state.articleTopic.trim()
+        );
+
+    }
+
+    state.articlePassages =
+      selected;
+
+    save();
+    render();
+
+    const response =
+      await fetch(
+        AI_WORKER_URL,
+        {
+          method:
+            'POST',
+
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+
+          body:
+            JSON.stringify({
+
+              type:
+                'article',
+
+              topic:
+                state.articleTopic.trim(),
+
+              prompt:
+                state.articleTopic.trim(),
+
+              language:
+                state.lang ===
+                'sl'
+                  ? 'Slovenščina'
+                  : 'English',
+
+              minWords:
+                10000,
+
+              passages:
+                selected
+
+            })
+
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      !response.ok ||
+      !data ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data?.error ||
+        t('articleErrorGeneric')
+      );
+
+    }
+
+    state.generatedArticle =
+      String(
+        data.article ||
+        data.answer ||
+        data.content ||
+        ''
+      )
+        .trim();
+
+    if (
+      !state.generatedArticle
+    ) {
+
+      throw new Error(
+        t('articleErrorGeneric')
+      );
+
+    }
+
+    saveGeneratedWork({
+
+      type:
+        'article',
+
+      title:
+        state.articleTopic.trim(),
+
+      prompt:
+        state.articleTopic.trim(),
+
+      language:
+        state.lang ===
+        'sl'
+          ? 'Slovenščina'
+          : 'English',
+
+      length:
+        '10000+',
+
+      content:
+        state.generatedArticle,
+
+      passages:
+        state.articlePassages
+
+    });
+
+    state.articleGenerating =
+      false;
+
+    state.screen =
+      'result';
+
+    save();
+    render();
+
+  } catch (error) {
+
+    console.error(
+      'AI Article generation error:',
+      error
+    );
+
+    state.articleGenerating =
+      false;
+
+    state.articleError =
+      error?.message ||
+      t('articleErrorGeneric');
+
+    state.screen =
+      'result';
+
+    save();
+    render();
+
+  }
+
+}
+
+
+/* =========================================================
    ASK THE BOOKS
    ========================================================= */
 
@@ -4681,6 +5058,53 @@ function create() {
 
           ${escapeHtml(
             state.assistantPrompt
+          )}
+
+        </div>
+
+      </div>
+
+    `);
+
+  }
+
+  if (
+    state.articleGenerating
+  ) {
+
+    return layout(`
+
+      <div class="working">
+
+        <div class="dot"></div>
+
+        <h2
+          style="
+            margin-top:20px
+          ">
+
+          ${t(
+            'articlePreparing'
+          )}
+
+        </h2>
+
+        <div class="muted">
+
+          ${escapeHtml(
+            state.articleTopic
+          )}
+
+        </div>
+
+        <div
+          class="muted"
+          style="
+            margin-top:10px
+          ">
+
+          ${t(
+            'articleMinimum'
           )}
 
         </div>
@@ -5150,6 +5574,108 @@ function create() {
     }
 
 
+    <div
+      class="card"
+      style="
+        margin-top:32px
+      ">
+
+      <h2
+        style="
+          margin:0
+        ">
+
+        ${t(
+          'articleWriting'
+        )}
+
+      </h2>
+
+      <p
+        class="muted"
+        style="
+          margin-top:8px;
+          margin-bottom:18px
+        ">
+
+        ${t(
+          'articleDescription'
+        )}
+
+      </p>
+
+      <h3>
+
+        ${t(
+          'articleTopic'
+        )}
+
+      </h3>
+
+      <textarea
+        class="textarea"
+        style="
+          margin-top:10px;
+          min-height:220px
+        "
+        oninput="
+          setArticleTopic(
+            this.value
+          )
+        "
+        placeholder="${t(
+          'articlePlaceholder'
+        )}">${escapeHtml(
+          state.articleTopic
+        )}</textarea>
+
+      <h3>
+
+        ${t(
+          'articleLength'
+        )}
+
+      </h3>
+
+      <div
+        class="muted"
+        style="
+          margin-top:10px;
+          padding:12px 14px;
+          border:1px solid rgba(0,0,0,0.08);
+          border-radius:10px;
+          line-height:1.5
+        ">
+
+        📝
+
+        ${t(
+          'articleMinimum'
+        )}
+
+      </div>
+
+      <button
+        type="button"
+        class="primary"
+        style="
+          margin-top:16px
+        "
+        onclick="
+          generateArticle()
+        ">
+
+        ✦
+
+        ${t(
+          'createArticle'
+        )}
+
+      </button>
+
+    </div>
+
+
     ${
       BOOKS.length
         ? `
@@ -5544,6 +6070,51 @@ function result() {
 
 
   if (
+    state.articleGenerating
+  ) {
+
+    return layout(`
+
+      <div class="working">
+
+        <div class="dot"></div>
+
+        <h2>
+
+          ${t(
+            'articlePreparing'
+          )}
+
+        </h2>
+
+        <div class="muted">
+
+          ${escapeHtml(
+            state.articleTopic
+          )}
+
+        </div>
+
+        <div
+          class="muted"
+          style="
+            margin-top:10px
+          ">
+
+          ${t(
+            'articleMinimum'
+          )}
+
+        </div>
+
+      </div>
+
+    `);
+
+  }
+
+
+  if (
     state.askGenerating
   ) {
 
@@ -5764,6 +6335,191 @@ function result() {
 
   if (
     state.creationType ===
+    'article'
+  ) {
+
+    if (
+      state.articleError
+    ) {
+
+      return layout(`
+
+        <div class="top">
+
+          <button
+            type="button"
+            class="back"
+            onclick="
+              go('create')
+            ">
+
+            ‹
+
+          </button>
+
+          <div style="flex:1">
+
+            <strong>
+
+              ${t(
+                'articleWriting'
+              )}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+        <div class="section card">
+
+          <h3>
+
+            ${t(
+              'articleError'
+            )}
+
+          </h3>
+
+          <p class="muted">
+
+            ${escapeHtml(
+              state.articleError
+            )}
+
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="primary"
+          onclick="
+            generateArticle()
+          ">
+
+          ✦
+
+          ${t(
+            'createArticle'
+          )}
+
+        </button>
+
+      `);
+
+    }
+
+    return layout(`
+
+      <div class="top">
+
+        <button
+          type="button"
+          class="back"
+          onclick="
+            go('create')
+          ">
+
+          ‹
+
+        </button>
+
+        <div style="flex:1">
+
+          <strong>
+
+            ${t(
+              'articleWriting'
+            )}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+      <div
+        class="eyebrow"
+        style="
+          margin-top:10px
+        ">
+
+        ${t(
+          'articleWriting'
+        )}
+
+      </div>
+
+      <h1>
+
+        ${escapeHtml(
+          state.articleTopic
+        )}
+
+      </h1>
+
+      <div
+        class="muted"
+        style="
+          margin-bottom:22px
+        ">
+
+        ${t(
+          'articleMinimum'
+        )}
+
+      </div>
+
+      <div class="section">
+
+        ${
+          state.generatedArticle
+            ? formatText(
+                state.generatedArticle
+              )
+
+            : `
+
+              <div class="muted">
+
+                ${t(
+                  'articleNotCreated'
+                )}
+
+              </div>
+
+            `
+        }
+
+      </div>
+
+      ${sourceBlock(
+        state.articlePassages
+      )}
+
+      <button
+        type="button"
+        class="primary"
+        onclick="
+          go('create')
+        ">
+
+        ←
+
+        ${t(
+          'create'
+        )}
+
+      </button>
+
+    `);
+
+  }
+
+
+  if (
+    state.creationType ===
     'ask'
   ) {
 
@@ -5885,7 +6641,7 @@ function result() {
         ">
 
         ${t(
-          'generatedWork'
+          'answer'
         )}
 
       </div>
@@ -6209,24 +6965,34 @@ function saved() {
                         )
 
                       : work.type ===
-                        'ask'
+                        'article'
 
                         ? t(
-                            'askWork'
+                            'articleWork'
                           )
 
-                        : t(
-                            'lectureWork'
-                          );
+                        : work.type ===
+                          'ask'
+
+                          ? t(
+                              'askWork'
+                            )
+
+                          : t(
+                              'lectureWork'
+                            );
 
                   const marker =
                     work.type ===
                     'assistant'
                       ? 'AI'
                       : work.type ===
-                        'ask'
-                        ? 'Q'
-                        : 'A';
+                        'article'
+                        ? 'Č'
+                        : work.type ===
+                          'ask'
+                          ? 'Q'
+                          : 'A';
 
                   const title =
                     work.title ||
@@ -6520,6 +7286,9 @@ window.generate =
 window.generateAssistant =
   generateAssistant;
 
+window.generateArticle =
+  generateArticle;
+
 window.generateAsk =
   generateAsk;
 
@@ -6534,6 +7303,9 @@ window.setLectureLength =
 
 window.setAssistantPrompt =
   setAssistantPrompt;
+
+window.setArticleTopic =
+  setArticleTopic;
 
 window.setAskPrompt =
   setAskPrompt;
