@@ -32,7 +32,7 @@ const GITHUB_REPO =
 
 
 const AI_WORKER_URL =
-  'https://TVOJ-NOVI-WORKER.workers.dev';
+  'https://ancient-lake-71ac.autointerviews.workers.dev/';
 
 
 const GITHUB_BOOKS_API =
