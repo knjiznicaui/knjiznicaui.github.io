@@ -24,11 +24,11 @@
  */
 
 const GITHUB_OWNER =
-  'NOVI-ACCOUNT';
+  'knjiznicaui';
 
 
 const GITHUB_REPO =
-  'NOVI-REPO';
+  'knjiznicaui.github.io';
 
 
 const AI_WORKER_URL =
