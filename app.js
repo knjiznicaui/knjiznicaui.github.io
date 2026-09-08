@@ -1436,25 +1436,17 @@ function library() {
    ========================================================= */
 
 function openBook(index) {
+  const book = BOOKS[index];
 
-  const book =
-    BOOKS[index];
-
-  if (!book) {
+  if (!book || !book.pdf) {
     return;
   }
 
-  state.book =
-    index;
-
-  state.screen =
-    'reader';
-
+  state.book = index;
   save();
-  render();
 
+  openPdf(book.pdf);
 }
-
 
 /* =========================================================
    OPEN PDF
