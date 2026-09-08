@@ -96,6 +96,12 @@ const I18N = {
     selectedBooks:
       'selected',
 
+    selectAll:
+      'Select all',
+
+    unselectAll:
+      'Unselect all',
+
     aiLecture:
       'AI Lecture',
 
@@ -339,6 +345,12 @@ const I18N = {
 
     selectedBooks:
       'izbranih',
+
+    selectAll:
+      'Označi vse',
+
+    unselectAll:
+      'Odznači vse',
 
     aiLecture:
       'AI predavanje',
@@ -1436,23 +1448,39 @@ function library() {
    ========================================================= */
 
 function openBook(index) {
-  const book = BOOKS[index];
 
-  if (!book || !book.pdf) {
+  const book =
+    BOOKS[index];
+
+  if (
+    !book ||
+    !book.pdf
+  ) {
+
     return;
+
   }
 
-  state.book = index;
+  state.book =
+    index;
+
   save();
 
-  openPdf(book.pdf);
+  openPdf(
+    book.pdf
+  );
+
 }
+
 
 /* =========================================================
    OPEN PDF
    ========================================================= */
 
-function openPdf(file, page) {
+function openPdf(
+  file,
+  page
+) {
 
   if (!file) {
     return;
@@ -1618,7 +1646,9 @@ function normalizeSearchText(value) {
    SEARCH SNIPPET
    ========================================================= */
 
-function makeSearchSnippet(result) {
+function makeSearchSnippet(
+  result
+) {
 
   const text =
     String(
@@ -2012,7 +2042,9 @@ function loadCachedSearchIndex() {
    SAVE SEARCH ROWS
    ========================================================= */
 
-function saveSearchRows(rows) {
+function saveSearchRows(
+  rows
+) {
 
   return openSearchDatabase()
     .then(
@@ -2466,7 +2498,9 @@ async function buildSearchIndex() {
    SEARCH INPUT
    ========================================================= */
 
-function setSearchQuery(value) {
+function setSearchQuery(
+  value
+) {
 
   state.query =
     value;
@@ -2520,7 +2554,9 @@ function setSearchQuery(value) {
    SEARCH FILTER
    ========================================================= */
 
-function setSearchFilter(value) {
+function setSearchFilter(
+  value
+) {
 
   state.filter =
     value;
@@ -2809,7 +2845,9 @@ function search() {
    OPEN SEARCH RESULT
    ========================================================= */
 
-function openSearchResult(index) {
+function openSearchResult(
+  index
+) {
 
   const results =
     getVisibleSearchResults();
@@ -2835,7 +2873,9 @@ function openSearchResult(index) {
    SOURCE SELECTION
    ========================================================= */
 
-function toggleLectureSource(index) {
+function toggleLectureSource(
+  index
+) {
 
   if (
     state.sources.includes(
@@ -2865,10 +2905,42 @@ function toggleLectureSource(index) {
 
 
 /* =========================================================
+   SELECT ALL / UNSELECT ALL SOURCES
+   ========================================================= */
+
+function toggleAllLectureSources() {
+
+  if (!BOOKS.length) {
+    return;
+  }
+
+  const allSelected =
+    state.sources.length ===
+      BOOKS.length;
+
+  state.sources =
+    allSelected
+      ? []
+      : BOOKS.map(
+          (
+            book,
+            index
+          ) => index
+        );
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
    FORM INPUTS
    ========================================================= */
 
-function setLectureTopic(value) {
+function setLectureTopic(
+  value
+) {
 
   state.lectureTopic =
     value;
@@ -2877,7 +2949,9 @@ function setLectureTopic(value) {
 
 }
 
-function setLectureLength(value) {
+function setLectureLength(
+  value
+) {
 
   state.lectureLength =
     String(value);
@@ -2887,7 +2961,9 @@ function setLectureLength(value) {
 
 }
 
-function setAssistantPrompt(value) {
+function setAssistantPrompt(
+  value
+) {
 
   state.assistantPrompt =
     value;
@@ -2896,7 +2972,9 @@ function setAssistantPrompt(value) {
 
 }
 
-function setArticleTopic(value) {
+function setArticleTopic(
+  value
+) {
 
   state.articleTopic =
     value;
@@ -2905,7 +2983,9 @@ function setArticleTopic(value) {
 
 }
 
-function setAskPrompt(value) {
+function setAskPrompt(
+  value
+) {
 
   state.askPrompt =
     value;
@@ -5168,7 +5248,8 @@ function create() {
                 justify-content:space-between;
                 align-items:center;
                 gap:12px;
-                margin-bottom:14px
+                margin-bottom:14px;
+                flex-wrap:wrap
               ">
 
               <h3
@@ -5182,15 +5263,50 @@ function create() {
 
               </h3>
 
-              <span class="muted">
+              <div
+                style="
+                  display:flex;
+                  align-items:center;
+                  gap:10px;
+                  flex-wrap:wrap
+                ">
 
-                ${selectedCount}
+                <span class="muted">
 
-                ${t(
-                  'selectedBooks'
-                )}
+                  ${selectedCount}
 
-              </span>
+                  ${t(
+                    'selectedBooks'
+                  )}
+
+                </span>
+
+                <button
+                  type="button"
+                  class="chip ${
+                    selectedCount ===
+                    BOOKS.length
+                      ? ''
+                      : 'on'
+                  }"
+                  onclick="
+                    toggleAllLectureSources()
+                  ">
+
+                  ${
+                    selectedCount ===
+                    BOOKS.length
+                      ? t(
+                          'unselectAll'
+                        )
+                      : t(
+                          'selectAll'
+                        )
+                  }
+
+                </button>
+
+              </div>
 
             </div>
 
@@ -7286,6 +7402,9 @@ window.generateAsk =
 
 window.toggleLectureSource =
   toggleLectureSource;
+
+window.toggleAllLectureSources =
+  toggleAllLectureSources;
 
 window.setLectureTopic =
   setLectureTopic;
